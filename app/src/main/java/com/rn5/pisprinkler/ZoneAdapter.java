@@ -1,13 +1,12 @@
 package com.rn5.pisprinkler;
 
-import android.app.LauncherActivity;
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.rn5.pisprinkler.define.HeadType;
 import com.rn5.pisprinkler.define.Zone;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> {
 
-    private List<Zone> mDataset;
+    private final List<Zone> mDataset;
 
 
     // Provide a reference to the views for each data item
@@ -50,6 +49,7 @@ public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> 
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         // - get element from your dataset at this position
@@ -61,7 +61,7 @@ public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> 
         final TextView pin = vItem.findViewById(R.id.zone_pin);
 
         zone.setText(Integer.toString(mDataset.get(position).getZone()));
-        type.setText(Integer.toString(mDataset.get(position).getType()));
+        type.setText(HeadType.getStringFromInt(mDataset.get(position).getType()));
         pin.setText(Integer.toString(mDataset.get(position).getPin()));
 
     }

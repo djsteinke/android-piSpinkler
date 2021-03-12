@@ -1,5 +1,6 @@
 package com.rn5.pisprinkler;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -12,6 +13,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.rn5.pisprinkler.define.HeadType;
 import com.rn5.pisprinkler.define.Zone;
 
 import java.util.ArrayList;
@@ -73,6 +75,23 @@ public class ZoneActivity extends AppCompatActivity {
             sPin.setAdapter(aPin);
 
             builder.setView(v);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String strType = (String) sType.getSelectedItem();
+                    Integer iPin = (Integer) sPin.getSelectedItem();
+                    Zone zone = new Zone().withZone(zones.size()+1)
+                    .withType(HeadType.getIntFromString((String)sType.getSelectedItem())).withPin(iPin);
+                    zones.add(zone);
+                    adapter.notifyDataSetChanged();
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
             builder.show();
         });
 
