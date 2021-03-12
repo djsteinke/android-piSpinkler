@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Pi Sprinkler</string>
+    <string name="main_menu">Main Menu</string>
+    <string name="summary">Summary</string>
+    <string name="programs">Programs</string>
+    <string name="zones">Zones</string>
+    <string name="pin">Pin</string>
+    <string name="type">Type</string>
+
+    <string-array name="zone_types">
+        <item>FIXED</item>
+        <item>ROTOR</item>
+        <item>ROTARY HE</item>
+    </string-array>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/d_menu_item"
+        android:icon="@drawable/ic_baseline_more_vert_24_w"
+        android:title="@string/main_menu"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/summary_item"
+                android:title="@string/summary"
+                android:icon="@drawable/ic_baseline_summary_24"/>
+            <item
+                android:id="@+id/program_item"
+                android:title="@string/programs"
+                android:icon="@drawable/ic_baseline_program_24"/>
+            <item
+                android:id="@+id/zone_item"
+                android:title="@string/zones"
+                android:icon="@drawable/ic_baseline_zone_24"/>
+        </menu>
+    </item>
+</menu>
