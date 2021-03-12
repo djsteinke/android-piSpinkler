@@ -1,6 +1,7 @@
 package com.rn5.pisprinkler;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,16 +9,18 @@ import android.widget.TextView;
 
 import com.rn5.pisprinkler.define.HeadType;
 import com.rn5.pisprinkler.define.Zone;
+import com.rn5.pisprinkler.define.ZoneAlert;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> {
 
     private final List<Zone> mDataset;
-
+    private final Context context;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -32,8 +35,9 @@ public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> 
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    ZoneAdapter(List<Zone> myDataset) {
+    ZoneAdapter(List<Zone> myDataset, Context context) {
         mDataset = myDataset;
+        this.context = context;
     }
 
     // Create new views (invoked by the layout manager)
@@ -56,6 +60,8 @@ public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> 
         // - replace the contents of the view with that element
 
         final View vItem = holder.vItem;
+        vItem.setOnClickListener(view -> ZoneAlert.getZoneAlert(this.context, this, position).show());
+        vItem.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this.context, this, position).show(); return true;});
         final TextView zone = vItem.findViewById(R.id.zone_id);
         final TextView type = vItem.findViewById(R.id.zone_type);
         final TextView pin = vItem.findViewById(R.id.zone_pin);

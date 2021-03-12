@@ -11,11 +11,15 @@ import com.rn5.pisprinkler.listener.UrlResponseListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 
 import static com.rn5.pisprinkler.MainActivity.getFTempString;
@@ -23,7 +27,7 @@ import static com.rn5.pisprinkler.MainActivity.getFTempString;
 public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
     private static final String TAG = UrlAsync.class.getSimpleName();
     private final Settings settings = Settings.load();
-    String urlString = "http://" + settings.getIp() + ":" + settings.getPort() + "/getTemp";
+    String urlString = "http://" + settings.getIp() + ":" + settings.getPort();
     private UrlResponseListener urlResponseListener;
     private RemoteViews remoteView;
     private AppWidgetManager appWidgetManager;
@@ -48,7 +52,9 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
     @Override
     protected JSONObject doInBackground(String... urls) {
         try {
-            URL url = new URL(urlString);
+            String finalUrl = urlString + "/" + urls[1];
+            Log.d(TAG, "doInBackground() " + urls[0] + " " + finalUrl);
+            URL url = new URL(finalUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setReadTimeout(10000);
             con.setConnectTimeout(10000);
@@ -59,19 +65,23 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
                 con.connect();
             else if (urls[0].equals("POST")) {
                 // TODO "POST" method
-                int val = 1;
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+                BufferedOutputStream out = new BufferedOutputStream(con.getOutputStream());
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+                writer.write(urls[2]);
+                writer.flush();
+                writer.close();
+                out.close();
+                con.connect();
             } else
                 return null;
-            System.out.println(con.toString());
-            System.out.println(con.getRequestMethod());
-            System.out.println(con.getResponseCode());
             BufferedReader br = new BufferedReader(new InputStreamReader((con.getInputStream())));
             StringBuilder sb = new StringBuilder();
             String output;
             while ((output = br.readLine()) != null) {
                 sb.append(output);
             }
-            System.out.println(sb.toString());
             return new JSONObject(sb.toString());
         } catch (IOException | JSONException e) {
             Log.e(TAG,"doInBackground() ERROR: " + e.getMessage());

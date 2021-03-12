@@ -45,7 +45,7 @@
         <TextView
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:text="@string/pin"
+            android:text="@string/gpio"
             android:textSize="@dimen/text"/>
         <Spinner
             android:id="@+id/pin_spinner"

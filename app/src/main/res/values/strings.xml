@@ -6,10 +6,13 @@
     <string name="zones">Zones</string>
     <string name="pin">Pin</string>
     <string name="type">Type</string>
+    <string name="gpio">GPIO</string>
+    <string name="gpio_pin">GPIO Pin</string>
+    <string name="delete_zone">Delete zone?</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>
-        <item>ROTOR</item>
         <item>ROTARY HE</item>
+        <item>ROTOR</item>
     </string-array>
 </resources>

@@ -2,8 +2,8 @@ package com.rn5.pisprinkler.define;
 
 public enum HeadType {
     FIXED("FIXED", 0),
-    ROTOR("ROTOR", 2),
     ROTARY_HE("ROTARY HE", 1),
+    ROTOR("ROTOR", 2),
     DEFAULT("Default", -1);
 
     private final String stringValue;

@@ -47,7 +47,7 @@ public class MainWidget extends AppWidgetProvider {
             appWidgetManager.updateAppWidget(appWidgetId, views);
 
             UrlAsync async = new UrlAsync().forWidget(views, appWidgetManager, appWidgetId);
-            async.execute("GET");
+            async.execute("GET","getTemp");
         }
     }
 

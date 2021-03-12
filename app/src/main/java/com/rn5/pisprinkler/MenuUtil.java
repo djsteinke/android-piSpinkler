@@ -20,13 +20,15 @@ public abstract class MenuUtil extends AppCompatActivity {
                 context.startActivity(new Intent(context, ZoneActivity.class));
                 break;
             default:
-                break;
+                return true;
         }
 
-        boolean b_finish = !sourceActivity.equals("MainActivity");
+        if (item.getItemId() != R.id.d_menu_item) {
+            boolean b_finish = !sourceActivity.equals("MainActivity");
 
-        if (b_finish)
-            context.finish();
+            if (b_finish)
+                context.finish();
+        }
 
         return true;
     }
