@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fb_text"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    android:layout_gravity="center"
+    android:background="@drawable/ic_baseline_zone_ring_24"
+    android:backgroundTint="@color/dark_blue"/>

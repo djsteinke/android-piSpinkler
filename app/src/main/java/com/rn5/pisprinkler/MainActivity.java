@@ -1,6 +1,7 @@
 package com.rn5.pisprinkler;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
@@ -9,13 +10,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.rn5.pisprinkler.define.Program;
@@ -41,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     TextView ipText;
     TextView portText;
     private TextView mainText;
+    private FlexboxLayout flexboxLayout;
+    private ConstraintLayout mainLayout;
 
     public static int port = 1983;
     public static String ip = "192.168.0.152";
@@ -63,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         settings = Settings.load();
         getSetup();
 
+        mainLayout = findViewById(R.id.main_layout);
+        flexboxLayout = findViewById(R.id.zone_flex_box);
         mainText = findViewById(R.id.main_text);
         ImageButton button = findViewById(R.id.button);
         ImageButton ipBtn = findViewById(R.id.ip_button);
@@ -83,6 +91,15 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         Log.d(TAG,"click()");
         UrlAsync async = new UrlAsync().withListener(this);
         async.execute("GET","getTemp");
+    }
+
+    private void loadFlexBox() {
+        for (Zone z : zones) {
+            View v = getLayoutInflater().inflate(R.layout.fb_text_view,flexboxLayout, false);
+            TextView tv = v.findViewById(R.id.fb_text);
+            tv.setText(String.format(Locale.US,"%d",z.getZone()));
+            flexboxLayout.addView(v);
+        }
     }
 
     public void alert(final String title, final int id) {
@@ -152,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 if (!programs.contains(newP))
                     programs.add(newP);
             }
+            loadFlexBox();
             return;
         } catch (JSONException e) {
             Log.e(TAG, "onResponse() Error: " + e.getMessage());
@@ -201,5 +219,11 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean result = menuItemSelector(this, item, TAG);
         return result || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        click();
     }
 }

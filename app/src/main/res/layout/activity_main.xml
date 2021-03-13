@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:id="@+id/main_layout">
 
 
     <ImageButton
@@ -27,11 +28,6 @@
         app:layout_constraintTop_toBottomOf="@id/button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/rectangle_rounded_corner"/>
     </com.google.android.flexbox.FlexboxLayout>
 
     <TextView
