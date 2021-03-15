@@ -4,6 +4,7 @@
     android:id="@+id/fb_text"
     android:layout_width="50dp"
     android:layout_height="50dp"
-    android:layout_gravity="center"
+    android:gravity="center"
+    android:layout_margin="5dp"
     android:background="@drawable/ic_baseline_zone_ring_24"
-    android:backgroundTint="@color/dark_blue"/>
+    android:backgroundTint="?attr/colorSecondary"/>

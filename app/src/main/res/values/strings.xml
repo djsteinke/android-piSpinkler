@@ -9,6 +9,11 @@
     <string name="gpio">GPIO</string>
     <string name="gpio_pin">GPIO Pin</string>
     <string name="delete_zone">Delete zone?</string>
+    <string name="add">Add</string>
+    <string name="start_time">Start Time</string>
+    <string name="interval">Interval</string>
+    <string name="name">Name</string>
+    <string name="days">Days</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>

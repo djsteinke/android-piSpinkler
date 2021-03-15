@@ -38,7 +38,8 @@ public class ZoneAlert {
         builder.setView(v);
         builder.setPositiveButton("OK",(dialog,which)-> {
             zones.remove(pos);
-            adapter.notifyDataSetChanged();
+            if (adapter != null)
+                adapter.notifyDataSetChanged();
         });
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 
@@ -85,7 +86,8 @@ public class ZoneAlert {
                         .withType(iType).withPin(iPin);
                 zones.add(zone);
             }
-            adapter.notifyDataSetChanged();
+            if (adapter != null)
+                adapter.notifyDataSetChanged();
         });
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 

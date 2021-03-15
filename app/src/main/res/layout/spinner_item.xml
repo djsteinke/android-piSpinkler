@@ -7,4 +7,4 @@
     android:ellipsize="marquee"
     android:textAlignment="inherit"
     android:textSize="@dimen/text"
-    android:textColor="@color/dark_blue"/>
+    android:textColor="?attr/colorSecondary"/>

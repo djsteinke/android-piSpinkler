@@ -25,6 +25,7 @@ import com.google.gson.GsonBuilder;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.Settings;
 import com.rn5.pisprinkler.define.Zone;
+import com.rn5.pisprinkler.define.ZoneAlert;
 import com.rn5.pisprinkler.listener.UrlResponseListener;
 
 import org.json.JSONArray;
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             View v = getLayoutInflater().inflate(R.layout.fb_text_view,flexboxLayout, false);
             TextView tv = v.findViewById(R.id.fb_text);
             tv.setText(String.format(Locale.US,"%d",z.getZone()));
+            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, z.getZone()-1).show());
             flexboxLayout.addView(v);
         }
     }

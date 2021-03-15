@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:ellipsize="marquee"
     android:textSize="@dimen/text"
-    android:textColor="@color/dark_blue"
+    android:textColor="?attr/colorSecondary"
     android:paddingTop="3dp"
     android:paddingBottom="3dp"
     android:paddingStart="10dp"
