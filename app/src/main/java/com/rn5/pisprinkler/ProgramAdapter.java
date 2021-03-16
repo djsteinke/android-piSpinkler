@@ -5,10 +5,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.rn5.pisprinkler.define.HeadType;
 import com.rn5.pisprinkler.define.Program;
+import com.rn5.pisprinkler.define.ProgramAlert;
 
 import static com.rn5.pisprinkler.define.Constants.sdf;
 import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
@@ -25,6 +28,7 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
 
     private final List<Program> dataSet;
     private final Context context;
+    ProgramAlert alert;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -42,6 +46,8 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
     ProgramAdapter(List<Program> myDataset, Context context) {
         dataSet = myDataset;
         this.context = context;
+        this.alert = new ProgramAlert().withContext(this.context)
+                .withAdapter(this);
     }
 
     // Create new views (invoked by the layout manager)
@@ -69,6 +75,12 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
         final TextView name = vItem.findViewById(R.id.name);
         final TextView desc = vItem.findViewById(R.id.desc);
         final TextView next = vItem.findViewById(R.id.next);
+        FlexboxLayout fb = vItem.findViewById(R.id.step_flex_box);
+
+        ImageButton btAddStep = vItem.findViewById(R.id.ib_add_step);
+        btAddStep.setOnClickListener(view -> {
+            ProgramAlert.getStepAlert(this.alert, fb, 0).show();
+        });
 
         name.setText(dataSet.get(position).getName());
         String description = "Runs at " + sdfTime.format(dataSet.get(position).getStartTime()) + " every " + dataSet.get(position).getInterval() + " days.";

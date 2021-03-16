@@ -14,6 +14,12 @@
     <string name="interval">Interval</string>
     <string name="name">Name</string>
     <string name="days">Days</string>
+    <string name="zone">Zone</string>
+    <string name="time">Time</string>
+    <string name="percent">Percent</string>
+    <string name="minutes">Minutes</string>
+    <string name="min">Min</string>
+    <string name="per">%</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>

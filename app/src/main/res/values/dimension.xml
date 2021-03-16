@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="small_text">12dp</dimen>
     <dimen name="text">16dp</dimen>
     <dimen name="widget_text">22dp</dimen>
     <dimen name="zone_item_margin">10dp</dimen>
