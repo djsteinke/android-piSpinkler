@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.rn5.pisprinkler"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -29,6 +29,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.github.santaevpavel:OutlineSpan:0.1.1'
     implementation 'com.google.android:flexbox:2.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor "org.projectlombok:lombok:1.18.16"

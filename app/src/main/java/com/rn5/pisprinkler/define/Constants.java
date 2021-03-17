@@ -15,4 +15,8 @@ public class Constants {
 
 
     public Constants() {}
+
+    public static String formatInt(int val) {
+        return String.format(Locale.US,"%d",val);
+    }
 }

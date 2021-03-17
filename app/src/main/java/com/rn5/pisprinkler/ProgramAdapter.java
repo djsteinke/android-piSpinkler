@@ -2,9 +2,13 @@ package com.rn5.pisprinkler;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -13,6 +17,8 @@ import com.rn5.pisprinkler.define.HeadType;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.ProgramAlert;
 
+import static com.rn5.pisprinkler.MainActivity.programs;
+import static com.rn5.pisprinkler.define.Constants.formatInt;
 import static com.rn5.pisprinkler.define.Constants.sdf;
 import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
 import static com.rn5.pisprinkler.define.Constants.sdfTime;
@@ -22,7 +28,9 @@ import java.util.List;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+import ru.santaev.outlinespan.OutlineSpan;
 
 public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHolder> {
 
@@ -79,7 +87,7 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
 
         ImageButton btAddStep = vItem.findViewById(R.id.ib_add_step);
         btAddStep.setOnClickListener(view -> {
-            ProgramAlert.getStepAlert(this.alert, fb, 0).show();
+            ProgramAlert.getStepAlert(this.alert, fb, programs.get(position).getSteps().size(), position);
         });
 
         name.setText(dataSet.get(position).getName());
@@ -87,6 +95,25 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
         desc.setText(description);
         String n = "Next run on " + sdfDisplay.format(dataSet.get(position).getNextRunTime()) + ".";
         next.setText(n);
+
+        for (Program.Step s : dataSet.get(position).getSteps()) {
+            ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(alert.getContext()).inflate(R.layout.fb_step_view, fb, false);
+
+            TextView tvZ = cl.findViewById(R.id.fb_zone_id);
+            tvZ.setText(formatInt(s.getZone()+1));
+
+            TextView tv = cl.findViewById(R.id.fb_step);
+            SpannableString ss1 = new SpannableString(formatInt(s.getStep()+1));
+            tv.setText(ss1);
+
+            TextView tvT = cl.findViewById(R.id.fb_time);
+            String val = formatInt((s.getPercent()>0?s.getPercent():s.getTime())) + (s.getPercent()>0?"%":" MIN");
+            SpannableString ss = new SpannableString(val);
+            ss.setSpan(new RelativeSizeSpan(.75f), val.length()-(s.getPercent()>0?1:3),val.length(), 0); // set size
+            tvT.setText(ss);
+
+            fb.addView(cl);
+        }
 
     }
 

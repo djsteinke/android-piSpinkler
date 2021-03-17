@@ -1,5 +1,6 @@
 package com.rn5.pisprinkler.define;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -13,7 +14,7 @@ public class Program {
     private Date nextRunTime;
     private Date startTime;
     private int interval;
-    private List<Step> steps;
+    private List<Step> steps = new ArrayList<>();
 
     public Program() {}
     public Program withName(String name) {
