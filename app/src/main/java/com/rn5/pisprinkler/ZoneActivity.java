@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.rn5.pisprinkler.adapter.ZoneAdapter;
 import com.rn5.pisprinkler.define.ZoneAlert;
 
 

@@ -1,36 +1,30 @@
-package com.rn5.pisprinkler;
+package com.rn5.pisprinkler.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.flexbox.FlexboxLayout;
-import com.rn5.pisprinkler.define.HeadType;
+import com.rn5.pisprinkler.R;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.ProgramAlert;
 
 import static com.rn5.pisprinkler.MainActivity.programs;
 import static com.rn5.pisprinkler.define.Constants.formatInt;
-import static com.rn5.pisprinkler.define.Constants.sdf;
 import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
 import static com.rn5.pisprinkler.define.Constants.sdfTime;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
-import ru.santaev.outlinespan.OutlineSpan;
 
 public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHolder> {
 

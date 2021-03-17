@@ -9,7 +9,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.rn5.pisprinkler.R;
-import com.rn5.pisprinkler.ZoneAdapter;
+import com.rn5.pisprinkler.adapter.ZoneAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +82,7 @@ public class ZoneAlert {
                 zones.get(pos).setPin(iPin);
                 zones.get(pos).setType(iType);
             } else {
-                Zone zone = new Zone().withZone(pos + 1)
+                Zone zone = new Zone().withZone(pos)
                         .withType(iType).withPin(iPin);
                 zones.add(zone);
             }
