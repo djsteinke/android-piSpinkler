@@ -45,7 +45,7 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    ProgramAdapter(List<Program> myDataset, Context context) {
+    public ProgramAdapter(List<Program> myDataset, Context context) {
         dataSet = myDataset;
         this.context = context;
         this.alert = new ProgramAlert().withContext(this.context)
@@ -75,7 +75,8 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
         //vItem.setOnClickListener(view -> ZoneAlert.getZoneAlert(this.context, this, position).show());
         //vItem.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this.context, this, position).show(); return true;});
         final TextView name = vItem.findViewById(R.id.name);
-        final TextView desc = vItem.findViewById(R.id.desc);
+        final TextView tv_start = vItem.findViewById(R.id.start_time);
+        final TextView tv_interval = vItem.findViewById(R.id.tv_interval);
         final TextView next = vItem.findViewById(R.id.next);
         FlexboxLayout fb = vItem.findViewById(R.id.step_flex_box);
 
@@ -85,30 +86,45 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
         });
 
         name.setText(dataSet.get(position).getName());
-        String description = "Runs at " + sdfTime.format(dataSet.get(position).getStartTime()) + " every " + dataSet.get(position).getInterval() + " days.";
-        desc.setText(description);
-        String n = "Next run on " + sdfDisplay.format(dataSet.get(position).getNextRunTime()) + ".";
-        next.setText(n);
+        tv_start.setText(sdfTime.format(dataSet.get(position).getStartTime()));
+        String interval = dataSet.get(position).getInterval() + " DAYS";
+        tv_interval.setText(interval);
+        next.setText(sdfDisplay.format(dataSet.get(position).getNextRunTime()));
 
+        fb.removeAllViews();
         for (Program.Step s : dataSet.get(position).getSteps()) {
-            ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(alert.getContext()).inflate(R.layout.fb_step_view, fb, false);
+            ConstraintLayout cl = fb.findViewById(s.getStep());
+            if (cl != null) {
+                populateCl(cl, s);
+            } else {
+                cl = (ConstraintLayout) LayoutInflater.from(alert.getContext()).inflate(R.layout.fb_step_view, fb, false);
+                cl.setId(s.getStep());
 
-            TextView tvZ = cl.findViewById(R.id.fb_zone_id);
-            tvZ.setText(formatInt(s.getZone()+1));
+                populateCl(cl, s);
 
-            TextView tv = cl.findViewById(R.id.fb_step);
-            SpannableString ss1 = new SpannableString(formatInt(s.getStep()+1));
-            tv.setText(ss1);
+                cl.setOnClickListener(view -> ProgramAlert.getStepAlert(alert, fb, s.getStep(), position));
+                cl.setOnLongClickListener(view -> {ProgramAlert.getDeleteStepAlert(alert, fb, s.getStep(), position); return true;});
 
-            TextView tvT = cl.findViewById(R.id.fb_time);
-            String val = formatInt((s.getPercent()>0?s.getPercent():s.getTime())) + (s.getPercent()>0?"%":" MIN");
-            SpannableString ss = new SpannableString(val);
-            ss.setSpan(new RelativeSizeSpan(.75f), val.length()-(s.getPercent()>0?1:3),val.length(), 0); // set size
-            tvT.setText(ss);
-
-            fb.addView(cl);
+                fb.addView(cl);
+            }
         }
 
+    }
+
+    private ConstraintLayout populateCl(ConstraintLayout cl, Program.Step s) {
+        TextView tvZ = cl.findViewById(R.id.fb_zone_id);
+        tvZ.setText(formatInt(s.getZone() + 1));
+
+        TextView tv = cl.findViewById(R.id.fb_step);
+        SpannableString ss1 = new SpannableString(formatInt(s.getStep() + 1));
+        tv.setText(ss1);
+
+        TextView tvT = cl.findViewById(R.id.fb_time);
+        String val = formatInt((s.getPercent() > 0 ? s.getPercent() : s.getTime())) + (s.getPercent() > 0 ? "%" : " MIN");
+        SpannableString ss = new SpannableString(val);
+        ss.setSpan(new RelativeSizeSpan(.75f), val.length() - (s.getPercent() > 0 ? 1 : 3), val.length(), 0); // set size
+        tvT.setText(ss);
+        return cl;
     }
 
     // Return the size of your dataset (invoked by the layout manager)

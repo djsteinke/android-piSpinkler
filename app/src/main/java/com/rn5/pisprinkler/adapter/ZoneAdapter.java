@@ -35,7 +35,7 @@ public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> 
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    ZoneAdapter(List<Zone> myDataset, Context context) {
+    public ZoneAdapter(List<Zone> myDataset, Context context) {
         mDataset = myDataset;
         this.context = context;
     }

@@ -27,29 +27,10 @@ public class Settings {
     }
 
     Settings(String ip, int port) {
-        Log.d(TAG,"Settings(ip,port)");
+        Log.d(TAG,"Settings(ip[" + ip + "], port[" + port + "])");
         this.ip = ip;
         this.port = port;
     }
-
-    /*
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public String getIp() {
-        return this.ip;
-    }
-
-    public int getPort() {
-        return this.port;
-    }
-
-     */
 
     public void save() {
         Gson gson = new GsonBuilder().create();

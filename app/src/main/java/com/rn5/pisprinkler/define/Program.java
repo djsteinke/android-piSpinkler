@@ -51,6 +51,12 @@ public class Program {
 
     public void removeStep(int step) {
         for (Step s : this.steps) {
+            if (s.getStep() > step) {
+                int stepId = s.getStep() - 1;
+                s.setStep(stepId);
+            }
+        }
+        for (Step s : this.steps) {
             if (s.getStep() == step) {
                 this.steps.remove(s);
                 break;

@@ -12,25 +12,70 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/name"
-        android:textSize="@dimen/text"
+        android:textSize="@dimen/large_text"
         android:textStyle="bold"
         android:gravity="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
+    <ImageView
+        android:id="@+id/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/clock"
+        android:layout_marginTop="5dp"
+        app:layout_constraintTop_toBottomOf="@id/name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/start_time"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/desc"
+        android:id="@+id/start_time"
+        android:layout_marginStart="5dp"
         android:textSize="@dimen/text"
+        android:text="6:30 AM"
+        android:paddingBottom="1dp"
+        app:layout_constraintStart_toEndOf="@id/clock"
+        app:layout_constraintTop_toTopOf="@id/clock"
+        app:layout_constraintBottom_toBottomOf="@id/clock"
+        app:layout_constraintEnd_toStartOf="@id/iv_interval"/>
+    <ImageView
+        android:id="@+id/iv_interval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/interval"
+        android:layout_marginStart="10dp"
+        app:layout_constraintTop_toTopOf="@id/clock"
+        app:layout_constraintStart_toEndOf="@id/start_time"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_interval"
+        android:textSize="@dimen/text"
+        android:text="2 days"
+        android:paddingBottom="1dp"
+        android:backgroundTint="@color/transparent"
+        app:layout_constraintStart_toEndOf="@id/iv_interval"
+        app:layout_constraintTop_toTopOf="@id/iv_interval"
+        app:layout_constraintBottom_toBottomOf="@id/iv_interval"/>
+    <ImageView
+        android:id="@+id/next_run"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/next_date"
+        android:layout_marginTop="5dp"
+        app:layout_constraintTop_toBottomOf="@id/start_time"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name"/>
+        app:layout_constraintEnd_toStartOf="@id/next"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/next"
         android:textSize="@dimen/text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/desc"/>
+        android:text="Monday April 16th"
+        android:layout_marginStart="5dp"
+        app:layout_constraintStart_toEndOf="@id/next_run"
+        app:layout_constraintTop_toTopOf="@id/next_run"
+        app:layout_constraintBottom_toBottomOf="@id/next_run"/>
 
     <ImageButton
         android:layout_width="wrap_content"

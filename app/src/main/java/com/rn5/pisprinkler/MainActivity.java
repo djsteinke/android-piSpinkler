@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.Settings;
 import com.rn5.pisprinkler.define.Zone;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.rn5.pisprinkler.MenuUtil.menuItemSelector;
+import static com.rn5.pisprinkler.define.Constants.formatInt;
 
 public class MainActivity extends AppCompatActivity implements UrlResponseListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -98,8 +100,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         for (Zone z : zones) {
             View v = getLayoutInflater().inflate(R.layout.fb_text_view,flexboxLayout, false);
             TextView tv = v.findViewById(R.id.fb_text);
-            tv.setText(String.format(Locale.US,"%d",z.getZone()));
-            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, z.getZone()-1).show());
+            String zoneId = formatInt(z.getZone()+1);
+            tv.setText(zoneId);
+            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, z.getZone()).show());
             flexboxLayout.addView(v);
         }
     }
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             }
             loadFlexBox();
             return;
-        } catch (JSONException e) {
+        } catch (JSONException | JsonSyntaxException e) {
             Log.e(TAG, "onResponse() Error: " + e.getMessage());
         }
         try {

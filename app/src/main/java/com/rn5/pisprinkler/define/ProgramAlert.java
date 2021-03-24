@@ -145,6 +145,25 @@ public class ProgramAlert  {
         builder.show();
     }
 
+    public static void getDeleteStepAlert(ProgramAlert alert, final FlexboxLayout fb, final int pos, final int pPos) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(alert.getContext());
+        View v = LayoutInflater.from(alert.getContext()).inflate(R.layout.popup_step_delete, null);
+        TextView title = v.findViewById(R.id.tv_id);
+        String strZone = String.format(Locale.US,"%d",pos+1);
+        Log.d(TAG, "pos[" + pos + "] " + strZone);
+        title.setText(strZone);
+        builder.setView(v);
+        builder.setPositiveButton("OK",(dialog,which)-> {
+            programs.get(pPos).removeStep(pos);
+            if (alert.getAdapter() != null)
+                alert.getAdapter().notifyDataSetChanged();
+        });
+        builder.setNegativeButton("Cancel",(dialog,which)-> {
+
+        });
+        builder.show();
+    }
+
     public static void getStepAlert(ProgramAlert alert, final FlexboxLayout fb, final int pos, final int pPos) {
 
         final int id = pos+1;
@@ -153,7 +172,11 @@ public class ProgramAlert  {
         Spinner sZone = v.findViewById(R.id.step_zone_spinner);
         List<Integer> zoneIds = new ArrayList<>();
         for (Zone z : zones) {
-            zoneIds.add(z.getZone());
+            zoneIds.add(z.getZone()+1);
+        }
+        Program.Step s = null;
+        if (pos < programs.get(pPos).getSteps().size()) {
+            s = programs.get(pPos).getSteps().get(pos);
         }
         ArrayAdapter<Integer> aZone = new ArrayAdapter<>(alert.getContext(), R.layout.spinner_item, zoneIds);
         aZone.setDropDownViewResource(R.layout.spinner_dropdown_item);
@@ -172,6 +195,16 @@ public class ProgramAlert  {
         cbPercent.setOnCheckedChangeListener((compoundButton, b) -> {
             cbTime.setChecked(!b);
         });
+
+        if (s != null) {
+            if (s.getTime() > 0) {
+                etTime.setText(formatInt(s.getTime()));
+                cbTime.setChecked(true);
+            } else {
+                etPercent.setText(formatInt(s.getPercent()));
+                cbPercent.setChecked(true);
+            }
+        }
 
         builder.setView(v);
         builder.setPositiveButton("OK",(dialog,which)-> {
@@ -202,18 +235,30 @@ public class ProgramAlert  {
             }
 
             if (!bError) {
-                ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(alert.getContext()).inflate(R.layout.fb_step_view, fb, false);
-                TextView tv = cl.findViewById(R.id.fb_step);
-                tv.setText(formatInt(id));
-                TextView tvZ = cl.findViewById(R.id.fb_zone_id);
-                TextView tvT = cl.findViewById(R.id.fb_time);
-                tvZ.setText(formatInt(sZone.getSelectedItemPosition()+1));
-                String val = formatInt((cbPercent.isChecked()?percent:time)) + (cbPercent.isChecked()?"%":" MIN");
-                SpannableString ss = new SpannableString(val);
-                ss.setSpan(new RelativeSizeSpan(.75f), val.length()-(cbPercent.isChecked()?1:3),val.length(), 0); // set size
-                tvT.setText(ss);
-                fb.addView(cl);
-                programs.get(pPos).addStep(pos, sZone.getSelectedItemPosition(), percent, time);
+                if (pos >= programs.get(pPos).getSteps().size()) {
+                    ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(alert.getContext()).inflate(R.layout.fb_step_view, fb, false);
+                    TextView tv = cl.findViewById(R.id.fb_step);
+                    tv.setText(formatInt(id));
+                    TextView tvZ = cl.findViewById(R.id.fb_zone_id);
+                    TextView tvT = cl.findViewById(R.id.fb_time);
+                    tvZ.setText(formatInt(sZone.getSelectedItemPosition() + 1));
+                    String val = formatInt((cbPercent.isChecked() ? percent : time)) + (cbPercent.isChecked() ? "%" : " MIN");
+                    SpannableString ss = new SpannableString(val);
+                    ss.setSpan(new RelativeSizeSpan(.75f), val.length() - (cbPercent.isChecked() ? 1 : 3), val.length(), 0); // set size
+                    tvT.setText(ss);
+                    cl.setOnClickListener(view1 -> ProgramAlert.getStepAlert(alert, fb, pos, pPos));
+                    fb.addView(cl);
+                    programs.get(pPos).addStep(pos, sZone.getSelectedItemPosition(), percent, time);
+                } else {
+                    for (Program.Step pS : programs.get(pPos).getSteps()) {
+                        if (pS.getStep() == pos) {
+                            pS.setPercent(percent);
+                            pS.setTime(time);
+                            pS.setZone(sZone.getSelectedItemPosition());
+                            alert.getAdapter().notifyDataSetChanged();
+                        }
+                    }
+                }
                 dialog.dismiss();
             }
 

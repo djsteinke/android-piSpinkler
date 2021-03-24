@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.rn5.pisprinkler.adapter.ProgramAdapter;
+import com.google.gson.GsonBuilder;
 import com.rn5.pisprinkler.define.ProgramAlert;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,7 +52,9 @@ public class ProgramActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        Gson gson = new Gson();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.setDateFormat("yyyy-MM-dd hh:mm:ss");
+        Gson gson = gsonBuilder.create();
         UrlAsync async = new UrlAsync();
         async.execute("POST","update/programs", gson.toJson(programs));
     }
