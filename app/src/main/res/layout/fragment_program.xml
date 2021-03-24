@@ -4,10 +4,10 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="8dp"
-        android:background="@drawable/rectangle_r_c_zone_item"
+        android:background="@drawable/top_line"
         android:tint="?attr/colorOnSecondary"
         android:layout_margin="10dp"
         android:padding="10dp"
@@ -106,5 +106,16 @@
             app:layout_constraintEnd_toEndOf="parent">
         </com.google.android.flexbox.FlexboxLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/ll_dots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cl">
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                     programs.add(newP);
             }
             loadFlexBox();
+            this.onCreateProgram();
             return;
         } catch (JSONException | JsonSyntaxException e) {
             Log.e(TAG, "onResponse() Error: " + e.getMessage());

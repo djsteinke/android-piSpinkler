@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.flexbox.FlexboxLayout;
@@ -46,6 +48,11 @@ public class ProgramFragment extends Fragment {
         btAddStep.setOnClickListener(view -> {
             //ProgramAlert.getStepAlert(this.alert, fb, programs.get(pos).getSteps().size(), pos);
         });
+
+        LinearLayout ll = vItem.findViewById(R.id.ll_dots);
+        for (Program p : programs) {
+            inflater.inflate(R.layout.dot, ll, true);
+        }
 
         name.setText(programs.get(pos).getName());
         tv_start.setText(sdfTime.format(programs.get(pos).getStartTime()));
