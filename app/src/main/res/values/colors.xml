@@ -13,6 +13,7 @@
 
     <color name="off_white">#EEEEEE</color>
     <color name="off_black">#424242</color>
+    <color name="gray">#9E9E9E</color>
 
     <color name="transparent">#00FFFFFF</color>
 </resources>

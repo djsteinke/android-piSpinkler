@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.google.android.flexbox.FlexboxLayout;
 import com.rn5.pisprinkler.adapter.ProgramAdapter;
 import com.rn5.pisprinkler.R;
+import com.rn5.pisprinkler.listener.CreateListener;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -47,12 +48,17 @@ public class ProgramAlert  {
     private Date startDt;
     private Context context;
     private ProgramAdapter adapter;
+    private CreateListener listener;
 
     public ProgramAlert() {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY,6);
         cal.set(Calendar.MINUTE, 30);
         startDt = cal.getTime();
+    }
+    public ProgramAlert withListener(CreateListener listener) {
+        this.listener = listener;
+        return this;
     }
     public ProgramAlert withContext(Context context) {
         this.context = context;
@@ -138,6 +144,8 @@ public class ProgramAlert  {
             }
             if (alert.getAdapter() != null)
                 alert.getAdapter().notifyDataSetChanged();
+            if (alert.getListener() != null)
+                alert.getListener().onCreateProgram();
         });
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 

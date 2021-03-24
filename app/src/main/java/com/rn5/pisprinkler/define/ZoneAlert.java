@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.rn5.pisprinkler.R;
 import com.rn5.pisprinkler.adapter.ZoneAdapter;
+import com.rn5.pisprinkler.listener.CreateListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class ZoneAlert {
     public ZoneAlert() {
 
     }
-    public static AlertDialog.Builder getDeleteZoneAlert(Context context, ZoneAdapter adapter, final int pos) {
+    public static void getDeleteZoneAlert(Context context, ZoneAdapter adapter, CreateListener listener, final int pos) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View v = LayoutInflater.from(context).inflate(R.layout.popup_zone_delete, null);
@@ -38,16 +39,24 @@ public class ZoneAlert {
         builder.setView(v);
         builder.setPositiveButton("OK",(dialog,which)-> {
             zones.remove(pos);
+            int i = 0;
+            for (Zone z : zones) {
+                z.setZone(i);
+                i++;
+            }
             if (adapter != null)
                 adapter.notifyDataSetChanged();
+            if (listener != null)
+                listener.onCreateZone();
         });
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 
         });
-        return builder;
+
+        builder.show();
     }
 
-    public static AlertDialog.Builder getZoneAlert(Context context, ZoneAdapter adapter, final int pos) {
+    public static void getZoneAlert(Context context, ZoneAdapter adapter, CreateListener listener, final int pos) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View v = LayoutInflater.from(context).inflate(R.layout.popup_zone, null);
@@ -88,11 +97,14 @@ public class ZoneAlert {
             }
             if (adapter != null)
                 adapter.notifyDataSetChanged();
+            if (listener != null)
+                listener.onCreateZone();
         });
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 
         });
-        return builder;
+
+        builder.show();
     }
 
     private static int getPinPos(int val) {

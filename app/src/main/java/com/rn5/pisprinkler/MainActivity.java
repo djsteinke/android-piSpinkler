@@ -1,21 +1,22 @@
 package com.rn5.pisprinkler;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +24,10 @@ import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.nambimobile.widgets.efab.FabOption;
+import com.rn5.pisprinkler.adapter.ProgramSwipeAdapter;
+import com.rn5.pisprinkler.define.ProgramAlert;
+import com.rn5.pisprinkler.listener.CreateListener;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.Settings;
 import com.rn5.pisprinkler.define.Zone;
@@ -37,27 +42,29 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import static com.rn5.pisprinkler.MenuUtil.menuItemSelector;
 import static com.rn5.pisprinkler.define.Constants.formatInt;
 
-public class MainActivity extends AppCompatActivity implements UrlResponseListener {
+public class MainActivity extends AppCompatActivity implements UrlResponseListener, CreateListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     TextView ipText;
-    TextView portText;
     private TextView mainText;
     private FlexboxLayout flexboxLayout;
-    private ConstraintLayout mainLayout;
 
     public static int port = 1983;
     public static String ip = "192.168.0.152";
     public static File file;
     private Settings settings;
+    private FabOption addZoneFab;
+    private FabOption addProgramFab;
 
     public static final List<Program> programs = new ArrayList<>();
     public static final List<Zone> zones = new ArrayList<>();
+
+    private ViewPager2 pager;
+    private FragmentStateAdapter pagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,22 +79,21 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         settings = Settings.load();
         getSetup();
 
-        mainLayout = findViewById(R.id.main_layout);
         flexboxLayout = findViewById(R.id.zone_flex_box);
         mainText = findViewById(R.id.main_text);
         ImageButton button = findViewById(R.id.button);
         ImageButton ipBtn = findViewById(R.id.ip_button);
-        ImageButton portBtn = findViewById(R.id.port_button);
         ipText = findViewById(R.id.ip_text);
-        portText = findViewById(R.id.port_text);
-        ipText.setText(settings.getIp());
-        portText.setText(String.format(Integer.toString(settings.getPort()), Locale.US));
+        String val = settings.getIp() + " : " + formatInt(settings.getPort());
+        ipText.setText(val);
 
         button.setOnClickListener(view -> click());
 
-        ipBtn.setOnClickListener(view -> alert("Device IP:", ipBtn.getId()));
+        ipBtn.setOnClickListener(view -> alert());
 
-        portBtn.setOnClickListener(view -> alert("Port:", portBtn.getId()));
+        pager = findViewById(R.id.pager);
+        pagerAdapter = new ProgramSwipeAdapter(this, programs.size());
+        pager.setAdapter(pagerAdapter);
     }
 
     public void click() {
@@ -97,47 +103,51 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     private void loadFlexBox() {
+        flexboxLayout.removeAllViews();
         for (Zone z : zones) {
             View v = getLayoutInflater().inflate(R.layout.fb_text_view,flexboxLayout, false);
             TextView tv = v.findViewById(R.id.fb_text);
             String zoneId = formatInt(z.getZone()+1);
+            int typeDr = R.drawable.head_fixed;
+            switch (z.getType()) {
+                case 1:
+                    typeDr = R.drawable.head_rotary;
+                    break;
+                case 2:
+                    typeDr = R.drawable.head_rotor;
+                    break;
+                default:
+                    break;
+            }
+            v.setBackground(ContextCompat.getDrawable(this, typeDr));
             tv.setText(zoneId);
-            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, z.getZone()).show());
+            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, null, z.getZone()));
+            tv.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this, null, this, z.getZone());
+                return true;});
             flexboxLayout.addView(v);
         }
     }
 
-    public void alert(final String title, final int id) {
+    public void alert() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title);
 
-        FrameLayout layout = new FrameLayout(this);
+        View v = LayoutInflater.from(builder.getContext()).inflate(R.layout.popup_device,null);
+        final EditText etIp = v.findViewById(R.id.et_ip);
+        final EditText etPort = v.findViewById(R.id.et_port);
 
-        final EditText input = new EditText(this);
-        input.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        if (id == R.id.port_button)
-            input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        if (id == R.id.ip_button)
-            input.setText(ipText.getText().toString());
-        layout.addView(input);
-        final ViewGroup.MarginLayoutParams lpt =(ViewGroup.MarginLayoutParams)input.getLayoutParams();
-        lpt.setMargins(75,lpt.topMargin,110,lpt.bottomMargin);
-        builder.setView(layout);
+        etIp.setText(settings.getIp());
+        etPort.setText(formatInt(settings.getPort()));
+
+        builder.setView(v);
 
         // Set up the buttons
         builder.setPositiveButton("OK", (dialog, which) -> {
-            String val = input.getText().toString();
-            if (id == R.id.ip_button) {
-                ipText.setText(val);
-                ip = val;
-                settings.setIp(ip);
-            } else {
-                portText.setText(val);
-                port = Integer.parseInt(val);
-                settings.setPort(port);
-            }
+            String ip = etIp.getText().toString();
+            String port = etPort.getText().toString();
+            String val = ip + " : " + port;
+            ipText.setText(val);
+            settings.setIp(ip);
+            settings.setPort(Integer.parseInt(port));
             settings.save();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
@@ -152,8 +162,19 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     @Override
+    public void onCreateZone() {
+        loadFlexBox();
+    }
+
+    @Override
+    public void onCreateProgram() {
+        pagerAdapter = new ProgramSwipeAdapter(this, programs.size());
+        pager.setAdapter(pagerAdapter);
+    }
+
+    @Override
     public void onResponse(JSONObject val) {
-        String txt = "";
+        String txt;
         DecimalFormat df0 = new DecimalFormat("#");
         try {
             JSONObject setup = val.getJSONObject("setup");
@@ -199,6 +220,17 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         async.execute("GET","getSetup");
     }
 
+    public void addZone(View v) {
+        ZoneAlert.getZoneAlert(v.getContext(), null, this, zones.size());
+    }
+
+    public void addProgram(View v) {
+        ProgramAlert alert = new ProgramAlert()
+                .withListener(this)
+                .withContext(this);
+        ProgramAlert.getProgramAlert(alert, programs.size());
+    }
+
     public static String getTempString(double c) {
         DecimalFormat df1 = new DecimalFormat("#.#");
         return df1.format(c) + "\u00B0C [" + df1.format(getTempF(c)) + "\u00B0F]";
@@ -221,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         boolean result = menuItemSelector(this, item, TAG);
         return result || super.onOptionsItemSelected(item);
     }

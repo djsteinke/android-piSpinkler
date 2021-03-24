@@ -60,8 +60,8 @@ public class ZoneAdapter extends RecyclerView.Adapter<ZoneAdapter.MyViewHolder> 
         // - replace the contents of the view with that element
 
         final View vItem = holder.vItem;
-        vItem.setOnClickListener(view -> ZoneAlert.getZoneAlert(this.context, this, position).show());
-        vItem.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this.context, this, position).show(); return true;});
+        vItem.setOnClickListener(view -> ZoneAlert.getZoneAlert(this.context, this, null, position));
+        vItem.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this.context, this, null, position); return true;});
         final TextView zone = vItem.findViewById(R.id.zone_id);
         final TextView type = vItem.findViewById(R.id.zone_type);
         final TextView pin = vItem.findViewById(R.id.zone_pin);

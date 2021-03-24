@@ -16,7 +16,8 @@
         android:contentDescription="@string/app_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
 
     <com.google.android.flexbox.FlexboxLayout
         android:id="@+id/zone_flex_box"
@@ -25,7 +26,7 @@
         android:orientation="horizontal"
         app:justifyContent="flex_start"
         app:flexWrap="wrap"
-        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintTop_toBottomOf="@id/ip_ll"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
     </com.google.android.flexbox.FlexboxLayout>
@@ -40,6 +41,13 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/zone_flex_box"/>
+
     <LinearLayout
         android:id="@+id/ip_ll"
         android:layout_width="wrap_content"
@@ -49,7 +57,7 @@
         android:gravity="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/port_ll">
+        app:layout_constraintTop_toBottomOf="@id/button">
         <TextView
             android:id="@+id/ip_text"
             android:layout_width="wrap_content"
@@ -57,37 +65,57 @@
             android:text="192.168.0.152"
             android:gravity="center_horizontal"
             android:textSize="@dimen/text"
+            android:textColor="@color/gray"
             android:layout_marginEnd="10dp"/>
         <ImageButton
             android:id="@+id/ip_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_baseline_edit_24"/>
+
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/port_ll"
+    <!--
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="@id/ip_ll"
+        android:clickable="true"
+        android:layout_margin="20dp"
+        android:contentDescription="@string/add"
+        android:tint="?attr/colorControlNormal"
+        app:srcCompat="@drawable/ic_baseline_add_24"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:gravity="center"
-        android:padding="5dp"
-        android:layout_marginBottom="20dp">
-        <TextView
-            android:id="@+id/port_text"
+        app:layout_constraintEnd_toEndOf="parent"/>
+        -->
+
+    <com.nambimobile.widgets.efab.ExpandableFabLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.nambimobile.widgets.efab.ExpandableFab
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:elevation="10dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            android:src="@drawable/ic_baseline_add_24"
+            android:tint="@color/white"
+            android:scaleType="fitCenter"
+            android:background="@drawable/circle"
+            app:efab_orientation="portrait"/>
+        <com.nambimobile.widgets.efab.FabOption
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="1983"
-            android:textSize="@dimen/text"
-            android:layout_marginEnd="10dp"/>
-        <ImageButton
-            android:id="@+id/port_button"
+            android:src="@drawable/ic_baseline_zone_24"
+            android:onClick="addZone"
+            app:fab_orientation="portrait"/>
+        <com.nambimobile.widgets.efab.FabOption
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_edit_24"/>
-    </LinearLayout>
+            android:src="@drawable/ic_baseline_program_24"
+            app:fab_orientation="portrait"
+            android:onClick="addProgram"/>
+
+    </com.nambimobile.widgets.efab.ExpandableFabLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

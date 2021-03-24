@@ -21,6 +21,9 @@
     <string name="minutes">Minutes</string>
     <string name="min">Min</string>
     <string name="per">%</string>
+    <string name="ip">IP</string>
+    <string name="port">Port</string>
+    <string name="device">Device Settings</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>

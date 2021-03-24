@@ -43,7 +43,7 @@ public class ZoneActivity extends AppCompatActivity {
         FloatingActionButton button = findViewById(R.id.floatingActionButton);
         button.setOnClickListener(view -> {
             Log.d(TAG,"zone size(" + zones.size() + ")");
-            ZoneAlert.getZoneAlert(this, adapter, zones.size()).show();
+            ZoneAlert.getZoneAlert(this, adapter, null, zones.size());
         });
 
     }
