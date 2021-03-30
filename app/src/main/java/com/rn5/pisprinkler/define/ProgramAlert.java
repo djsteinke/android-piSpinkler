@@ -8,6 +8,8 @@ import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -98,12 +100,18 @@ public class ProgramAlert  {
 
     public static void getProgramAlert(ProgramAlert alert, final int pos) {
 
-
         AlertDialog.Builder builder = new AlertDialog.Builder(alert.getContext());
         View v = LayoutInflater.from(alert.getContext()).inflate(R.layout.popup_program, null);
         final TextView tvStartTime = v.findViewById(R.id.tv_run_time);
         final EditText etInterval = v.findViewById(R.id.et_interval);
         final EditText etName = v.findViewById(R.id.et_name);
+        if (pos < programs.size()) {
+            etName.setText(programs.get(pos).getName());
+            etInterval.setText(formatInt(programs.get(pos).getInterval()));
+            tvStartTime.setText(sdfTime.format(programs.get(pos).getStartTime()));
+            alert.setStartDt(programs.get(pos).getStartTime());
+        }
+        etName.requestFocus();
         TimePickerDialog.OnTimeSetListener listener = (timePicker, hour, min) -> {
             alert.setHour(hour);
             alert.setMinute(min);
@@ -150,7 +158,10 @@ public class ProgramAlert  {
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 
         });
-        builder.show();
+        builder.setNeutralButton("Delete", ((dialog, which) -> {}));
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     public static void getDeleteStepAlert(ProgramAlert alert, final FlexboxLayout fb, final int pos, final int pPos) {

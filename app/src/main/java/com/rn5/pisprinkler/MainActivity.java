@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,7 +54,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     TextView ipText;
     private TextView mainText;
     private FlexboxLayout flexboxLayout;
+    private LinearLayout ll_dots;
 
+    private int currProgram = 0;
     public static int port = 1983;
     public static String ip = "192.168.0.152";
     public static File file;
@@ -86,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         ipText = findViewById(R.id.ip_text);
         String val = settings.getIp() + " : " + formatInt(settings.getPort());
         ipText.setText(val);
+        ll_dots = findViewById(R.id.ll_dots);
 
         button.setOnClickListener(view -> click());
 
@@ -94,6 +99,14 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         pager = findViewById(R.id.pager);
         pagerAdapter = new ProgramSwipeAdapter(this, programs.size());
         pager.setAdapter(pagerAdapter);
+        pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                currProgram = position;
+                setLl_dots();
+            }
+        });
     }
 
     public void click() {
@@ -161,6 +174,22 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         return result && (file.canWrite() || file.setWritable(true, true));
     }
 
+    private void setLl_dots() {
+        if (ll_dots.getChildCount() != programs.size()) {
+            ll_dots.removeAllViews();
+            for (int i=0;i<programs.size();i++) {
+                ImageView iv = (ImageView) getLayoutInflater().inflate(R.layout.dot, ll_dots, false);
+                iv.setActivated(i != currProgram);
+                ll_dots.addView(iv);
+            }
+        } else {
+            for (int i = 0; i < programs.size(); i++) {
+                ImageView iv = (ImageView) ll_dots.getChildAt(i);
+                iv.setActivated(i != currProgram);
+            }
+        }
+    }
+
     @Override
     public void onCreateZone() {
         loadFlexBox();
@@ -170,6 +199,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     public void onCreateProgram() {
         pagerAdapter = new ProgramSwipeAdapter(this, programs.size());
         pager.setAdapter(pagerAdapter);
+        setLl_dots();
     }
 
     @Override

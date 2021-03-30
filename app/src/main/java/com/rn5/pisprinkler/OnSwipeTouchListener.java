@@ -6,12 +6,15 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.Toast;
 
 public class OnSwipeTouchListener implements OnTouchListener {
 
     private final GestureDetector gestureDetector;
+    private final Context context;
 
     public OnSwipeTouchListener (Context ctx){
+        this.context = ctx;
         gestureDetector = new GestureDetector(ctx, new GestureListener());
     }
 
@@ -63,9 +66,11 @@ public class OnSwipeTouchListener implements OnTouchListener {
     }
 
     public void onSwipeRight() {
+        Toast.makeText(context,"Swipe Right", Toast.LENGTH_SHORT).show();
     }
 
     public void onSwipeLeft() {
+        Toast.makeText(context,"Swipe Left", Toast.LENGTH_SHORT).show();
     }
 
     public void onSwipeTop() {

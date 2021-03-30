@@ -9,16 +9,18 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class ProgramSwipeAdapter extends FragmentStateAdapter {
     private static int NUM_PAGES = 5;
+    private final FragmentActivity fa;
 
     public ProgramSwipeAdapter(FragmentActivity fa, int p) {
         super(fa);
+        this.fa = fa;
         NUM_PAGES = p;
     }
 
     @Override
     @NonNull
     public Fragment createFragment(int position) {
-        return new ProgramFragment().withPos(position);
+        return new ProgramFragment(fa.getApplicationContext()).withPos(position);
     }
 
     @Override

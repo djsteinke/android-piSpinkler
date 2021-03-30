@@ -1,5 +1,6 @@
 package com.rn5.pisprinkler;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.google.android.flexbox.FlexboxLayout;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.ProgramAlert;
+import com.rn5.pisprinkler.define.SlideButton;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -26,7 +28,11 @@ import static com.rn5.pisprinkler.define.Constants.sdfTime;
 public class ProgramFragment extends Fragment {
 
     private int pos;
-    public ProgramFragment() {}
+    private final Context context;
+
+    public ProgramFragment(Context context) {
+        this.context = context;
+    }
     public ProgramFragment withPos(int pos) {
         this.pos = pos;
         return this;
@@ -44,15 +50,22 @@ public class ProgramFragment extends Fragment {
         final TextView next = vItem.findViewById(R.id.next);
         FlexboxLayout fb = vItem.findViewById(R.id.step_flex_box);
 
+        ImageButton btEdit = vItem.findViewById(R.id.ib_edit_slide);
         ImageButton btAddStep = vItem.findViewById(R.id.ib_add_step);
-        btAddStep.setOnClickListener(view -> {
+        ImageButton btEditProg = vItem.findViewById(R.id.ib_edit_program);
+        SlideButton sb = new SlideButton(this.context, btEdit)
+                .withButton(btAddStep)
+                .withButton(btEditProg);
+        btEdit.setOnClickListener(view -> {
+            sb.expand();
             //ProgramAlert.getStepAlert(this.alert, fb, programs.get(pos).getSteps().size(), pos);
         });
-
-        LinearLayout ll = vItem.findViewById(R.id.ll_dots);
-        for (Program p : programs) {
-            inflater.inflate(R.layout.dot, ll, true);
-        }
+        btEditProg.setOnClickListener(view -> {
+            ProgramAlert alert = new ProgramAlert()
+                    .withListener(null)
+                    .withContext(vItem.getContext());
+            ProgramAlert.getProgramAlert(alert, pos);
+        });
 
         name.setText(programs.get(pos).getName());
         tv_start.setText(sdfTime.format(programs.get(pos).getStartTime()));
