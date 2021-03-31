@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.MenuItem;
 
 import com.rn5.pisprinkler.define.ProgramAlert;
+import com.rn5.pisprinkler.listener.CreateListener;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,7 +12,7 @@ import static com.rn5.pisprinkler.MainActivity.alert;
 
 public abstract class MenuUtil extends AppCompatActivity {
 
-    public static boolean menuItemSelector(final AppCompatActivity context, MenuItem item, String sourceActivity) {
+    public static boolean menuItemSelector(final AppCompatActivity context, MenuItem item, CreateListener listener, String sourceActivity) {
 
         switch (item.getItemId()) {
             case R.id.summary_item:
@@ -24,7 +25,7 @@ public abstract class MenuUtil extends AppCompatActivity {
                 context.startActivity(new Intent(context, ZoneActivity.class));
                 break;
             case R.id.url_item:
-                alert(context);
+                alert(context, listener);
                 break;
             default:
                 return true;

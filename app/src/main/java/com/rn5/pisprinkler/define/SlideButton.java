@@ -45,7 +45,7 @@ public class SlideButton {
         int i = 1;
         animating = 0;
 
-        offset = main.getWidth()*0.10f;
+        offset = main.getWidth()*0.2f;
         float totOff = 0f;
         for (ImageButton ib : buttons) {
             if (i == 1) {
@@ -58,9 +58,9 @@ public class SlideButton {
         }
 
         if (expanded)
-            main.animate().rotation(120).setDuration(duration/3).setListener(getListener(2));
+            main.animate().rotation(75).setDuration(duration/3).setListener(getListener(2));
         else
-            main.animate().rotation(90).setDuration(duration).setListener(getListener(1));
+            main.animate().rotation(45).setDuration(duration).setListener(getListener(1));
     }
 
     private Animator.AnimatorListener getListener(int pos) {

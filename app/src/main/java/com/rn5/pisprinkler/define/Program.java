@@ -49,6 +49,10 @@ public class Program {
         this.steps.add(new Step(step, zone, percent, time));
     }
 
+    public void addStep(Step step) {
+        this.steps.add(step);
+    }
+
     public void removeStep(int step) {
         for (Step s : this.steps) {
             if (s.getStep() > step) {
@@ -65,19 +69,4 @@ public class Program {
     }
 
 
-    @Data
-    public class Step {
-        private int step;
-        private int zone;
-        private int percent;
-        private int time;
-
-        Step() {}
-        Step(int step, int zone, int percent, int time) {
-            this.step = step;
-            this.zone = zone;
-            this.percent = percent;
-            this.time = time;
-        }
-    }
 }

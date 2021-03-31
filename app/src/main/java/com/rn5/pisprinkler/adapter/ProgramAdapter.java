@@ -14,6 +14,7 @@ import com.google.android.flexbox.FlexboxLayout;
 import com.rn5.pisprinkler.R;
 import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.ProgramAlert;
+import com.rn5.pisprinkler.define.Step;
 
 import static com.rn5.pisprinkler.MainActivity.programs;
 import static com.rn5.pisprinkler.define.Constants.formatInt;
@@ -92,7 +93,7 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
         next.setText(sdfDisplay.format(dataSet.get(position).getNextRunTime()));
 
         fb.removeAllViews();
-        for (Program.Step s : dataSet.get(position).getSteps()) {
+        for (Step s : dataSet.get(position).getSteps()) {
             ConstraintLayout cl = fb.findViewById(s.getStep());
             if (cl != null) {
                 populateCl(cl, s);
@@ -111,7 +112,7 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
 
     }
 
-    private ConstraintLayout populateClv(ConstraintLayout cl, Program.Step s) {
+    private ConstraintLayout populateClv(ConstraintLayout cl, Step s) {
         TextView tvZ = cl.findViewById(R.id.zone_id);
         tvZ.setText(formatInt(s.getZone() + 1));
 
@@ -123,7 +124,7 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
         return cl;
     }
 
-    private ConstraintLayout populateCl(ConstraintLayout cl, Program.Step s) {
+    private ConstraintLayout populateCl(ConstraintLayout cl, Step s) {
         TextView tvZ = cl.findViewById(R.id.fb_zone_id);
         tvZ.setText(formatInt(s.getZone() + 1));
 

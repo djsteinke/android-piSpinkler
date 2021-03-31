@@ -3,6 +3,7 @@ package com.rn5.pisprinkler;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -95,10 +96,10 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
         button.setOnClickListener(view -> click());
 
-        ipBtn.setOnClickListener(view -> alert(this));
+        //ipBtn.setOnClickListener(view -> alert(this));
 
         pager = findViewById(R.id.pager);
-        pagerAdapter = new ProgramSwipeAdapter(this, this, programs.size());
+        pagerAdapter = new ProgramSwipeAdapter(this, this, this, programs.size());
         pager.setAdapter(pagerAdapter);
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -142,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         }
     }
 
-    public static void alert(Context context) {
+    public static void alert(Context context, CreateListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         View v = LayoutInflater.from(builder.getContext()).inflate(R.layout.popup_device,null);
@@ -158,11 +159,11 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         builder.setPositiveButton("OK", (dialog, which) -> {
             String ip = etIp.getText().toString();
             String port = etPort.getText().toString();
-            String val = ip + ":" + port;
-            //ipText.setText(val);
             settings.setIp(ip);
             settings.setPort(Integer.parseInt(port));
             settings.save();
+            if (listener != null)
+                listener.onUpdateUrl();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
@@ -191,6 +192,46 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         }
     }
 
+    private void saveProgram() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.setDateFormat("yyyy-MM-dd hh:mm:ss");
+        Gson gson = gsonBuilder.create();
+        UrlAsync async = new UrlAsync();
+        async.execute("POST","update/programs", gson.toJson(programs));
+    }
+
+    @Override
+    public void onUpdateProgram(int pPos) {
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+        if (allFragments != null) {
+            for (Fragment fragment : allFragments) {
+                ProgramFragment f1 = (ProgramFragment) fragment;
+                if (f1.getPos() == pPos)
+                    f1.updateProgram();
+            }
+        }
+        saveProgram();
+    }
+
+    @Override
+    public void onUpdateStep(int pPos) {
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+        if (allFragments != null) {
+            for (Fragment fragment : allFragments) {
+                ProgramFragment f1 = (ProgramFragment) fragment;
+                if (f1.getPos() == pPos)
+                    f1.updateSteps();
+            }
+        }
+        saveProgram();
+    }
+
+    @Override
+    public void onUpdateUrl() {
+        String val = settings.getIp() + ":" + formatInt(settings.getPort());
+        ipText.setText(val);
+    }
+
     @Override
     public void onCreateZone() {
         loadFlexBox();
@@ -198,9 +239,10 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
     @Override
     public void onCreateProgram() {
-        pagerAdapter = new ProgramSwipeAdapter(this, this, programs.size());
+        pagerAdapter = new ProgramSwipeAdapter(this, this, this, programs.size());
         pager.setAdapter(pagerAdapter);
         setLl_dots();
+        saveProgram();
     }
 
     @Override
@@ -286,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        boolean result = menuItemSelector(this, item, TAG);
+        boolean result = menuItemSelector(this, item, this, TAG);
         return result || super.onOptionsItemSelected(item);
     }
 

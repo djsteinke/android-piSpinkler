@@ -65,7 +65,7 @@ public class ZoneActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        boolean result = menuItemSelector(this, item, TAG);
+        boolean result = menuItemSelector(this, item, null, TAG);
         return result || super.onOptionsItemSelected(item);
     }
 }

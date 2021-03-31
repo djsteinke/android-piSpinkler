@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -139,7 +138,9 @@ public class ProgramAlert  {
             int interval = Integer.parseInt(etInterval.getText().toString());
             String name = etName.getText().toString();
 
+            boolean add = true;
             if (pos < programs.size()) {
+                add = false;
                 programs.get(pos).setStartTime(dt);
                 programs.get(pos).setInterval(interval);
                 programs.get(pos).setName(name);
@@ -152,13 +153,24 @@ public class ProgramAlert  {
             }
             if (alert.getAdapter() != null)
                 alert.getAdapter().notifyDataSetChanged();
-            if (alert.getListener() != null)
-                alert.getListener().onCreateProgram();
+            if (alert.getListener() != null) {
+                if (add)
+                    alert.getListener().onCreateProgram();
+                else
+                    alert.getListener().onUpdateProgram(pos);
+            }
         });
         builder.setNegativeButton("Cancel",(dialog,which)-> {
 
         });
-        builder.setNeutralButton("Delete", ((dialog, which) -> {}));
+        if (pos < programs.size()) {
+            builder.setNeutralButton("Delete", ((dialog, which) -> {
+                programs.remove(pos);
+                if (alert.getListener() != null) {
+                    alert.getListener().onCreateProgram();
+                }
+            }));
+        }
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
         alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -193,7 +205,7 @@ public class ProgramAlert  {
         for (Zone z : zones) {
             zoneIds.add(z.getZone()+1);
         }
-        Program.Step s = null;
+        Step s = null;
         if (pos < programs.get(pPos).getSteps().size()) {
             s = programs.get(pPos).getSteps().get(pos);
         }
@@ -270,7 +282,7 @@ public class ProgramAlert  {
                     fb.addView(cl);
                     programs.get(pPos).addStep(pos, sZone.getSelectedItemPosition(), percent, time);
                 } else {
-                    for (Program.Step pS : programs.get(pPos).getSteps()) {
+                    for (Step pS : programs.get(pPos).getSteps()) {
                         if (pS.getStep() == pos) {
                             pS.setPercent(percent);
                             pS.setTime(time);

@@ -9,17 +9,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.flexbox.FlexboxLayout;
-import com.rn5.pisprinkler.define.Program;
 import com.rn5.pisprinkler.define.ProgramAlert;
 import com.rn5.pisprinkler.define.SlideButton;
+import com.rn5.pisprinkler.define.Step;
+import com.rn5.pisprinkler.define.StepAlert;
+import com.rn5.pisprinkler.listener.CreateListener;
+
+import java.util.zip.Inflater;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import static com.rn5.pisprinkler.MainActivity.programs;
 import static com.rn5.pisprinkler.MainActivity.zones;
@@ -27,16 +33,29 @@ import static com.rn5.pisprinkler.define.Constants.formatInt;
 import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
 import static com.rn5.pisprinkler.define.Constants.sdfTime;
 
+@Getter
+@Setter
 public class ProgramFragment extends Fragment {
 
     private int pos;
-    private final Context context;
+    private Context context;
+    private FlexboxLayout fb;
+    private CreateListener listener;
+    private StepAlert stepAlert;
+    private TextView name;
+    private TextView tv_start;
+    private TextView tv_interval;
+    private TextView next;
 
     public ProgramFragment(Context context) {
         this.context = context;
     }
     public ProgramFragment withPos(int pos) {
         this.pos = pos;
+        return this;
+    }
+    public ProgramFragment withListener(CreateListener listener) {
+        this.listener = listener;
         return this;
     }
     @Override
@@ -46,21 +65,21 @@ public class ProgramFragment extends Fragment {
                 R.layout.fragment_program, container, false);
         //vItem.setOnClickListener(view -> ZoneAlert.getZoneAlert(this.context, this, position).show());
         //vItem.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this.context, this, position).show(); return true;});
-        final TextView name = vItem.findViewById(R.id.name);
-        final TextView tv_start = vItem.findViewById(R.id.start_time);
-        final TextView tv_interval = vItem.findViewById(R.id.tv_interval);
-        final TextView next = vItem.findViewById(R.id.next);
-        FlexboxLayout fb = vItem.findViewById(R.id.step_flex_box);
+        name = vItem.findViewById(R.id.name);
+        tv_start = vItem.findViewById(R.id.start_time);
+        tv_interval = vItem.findViewById(R.id.tv_interval);
+        next = vItem.findViewById(R.id.next);
+        fb = vItem.findViewById(R.id.step_flex_box);
 
         ImageButton btEdit = vItem.findViewById(R.id.ib_edit_slide);
         ImageButton btAddStep = vItem.findViewById(R.id.ib_add_step);
         ImageButton btEditProg = vItem.findViewById(R.id.ib_edit_program);
+        stepAlert = new StepAlert(context).withListener(this.listener);
         SlideButton sb = new SlideButton(this.context, btEdit)
                 .withButton(btAddStep)
                 .withButton(btEditProg);
         btEdit.setOnClickListener(view -> {
             sb.expand();
-            //ProgramAlert.getStepAlert(this.alert, fb, programs.get(pos).getSteps().size(), pos);
         });
         btEditProg.setOnClickListener(view -> {
             ProgramAlert alert = new ProgramAlert()
@@ -68,35 +87,45 @@ public class ProgramFragment extends Fragment {
                     .withContext(vItem.getContext());
             ProgramAlert.getProgramAlert(alert, pos);
         });
+        btAddStep.setOnClickListener(view -> {
+            StepAlert.getStepAlert(stepAlert, programs.get(pos).getSteps().size(), pos);
+        });
 
+        updateProgram();
+        updateSteps();
+
+        return vItem;
+    }
+
+    public void updateProgram() {
         name.setText(programs.get(pos).getName());
         tv_start.setText(sdfTime.format(programs.get(pos).getStartTime()));
         String interval = programs.get(pos).getInterval() + " DAYS";
         tv_interval.setText(interval);
         next.setText(sdfDisplay.format(programs.get(pos).getNextRunTime()));
+    }
 
+    public void updateSteps() {
         fb.removeAllViews();
-        for (Program.Step s : programs.get(pos).getSteps()) {
+        for (Step s : programs.get(pos).getSteps()) {
             ConstraintLayout cl = fb.findViewById(s.getStep());
             if (cl != null) {
                 populateCl(cl, s);
             } else {
-                cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_v, fb, false);
+                cl = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.fb_step_v, fb, false);
                 cl.setId(s.getStep());
 
                 populateClv(context, cl, s, programs.get(pos).getSteps().size());
-                ProgramAlert alert = new ProgramAlert().withContext(context);
 
-                cl.setOnClickListener(view -> ProgramAlert.getStepAlert(alert, fb, s.getStep(), pos));
+                cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
                 //cl.setOnLongClickListener(view -> {ProgramAlert.getDeleteStepAlert(alert, fb, s.getStep(), pos); return true;});
 
                 fb.addView(cl);
             }
         }
-        return vItem;
     }
 
-    private ConstraintLayout populateClv(Context context, ConstraintLayout cl, Program.Step s, int size) {
+    private ConstraintLayout populateClv(Context context, ConstraintLayout cl, Step s, int size) {
         TextView tvZ = cl.findViewById(R.id.zone_id);
         tvZ.setText(formatInt(s.getZone() + 1));
         int type = zones.get(s.getZone()).getType();
@@ -130,7 +159,7 @@ public class ProgramFragment extends Fragment {
         return cl;
     }
 
-    private ConstraintLayout populateCl(ConstraintLayout cl, Program.Step s) {
+    private ConstraintLayout populateCl(ConstraintLayout cl, Step s) {
         TextView tvZ = cl.findViewById(R.id.fb_zone_id);
         tvZ.setText(formatInt(s.getZone() + 1));
 
