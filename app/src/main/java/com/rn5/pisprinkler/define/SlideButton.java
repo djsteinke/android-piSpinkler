@@ -45,7 +45,7 @@ public class SlideButton {
         int i = 1;
         animating = 0;
 
-        offset = main.getWidth()*0.2f;
+        offset = main.getWidth()*0.3f;
         float totOff = 0f;
         for (ImageButton ib : buttons) {
             if (i == 1) {

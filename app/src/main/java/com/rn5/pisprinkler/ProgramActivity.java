@@ -63,6 +63,8 @@ public class ProgramActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu,menu);
+        MenuItem menuItem = menu.findItem(R.id.url_item);
+        menuItem.setVisible(false);
         return true;
     }
 

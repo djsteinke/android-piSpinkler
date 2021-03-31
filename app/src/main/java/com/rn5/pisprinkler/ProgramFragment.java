@@ -63,8 +63,7 @@ public class ProgramFragment extends Fragment {
                              Bundle savedInstanceState) {
         final View vItem = (ViewGroup) inflater.inflate(
                 R.layout.fragment_program, container, false);
-        //vItem.setOnClickListener(view -> ZoneAlert.getZoneAlert(this.context, this, position).show());
-        //vItem.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this.context, this, position).show(); return true;});
+
         name = vItem.findViewById(R.id.name);
         tv_start = vItem.findViewById(R.id.start_time);
         tv_interval = vItem.findViewById(R.id.tv_interval);
@@ -78,18 +77,14 @@ public class ProgramFragment extends Fragment {
         SlideButton sb = new SlideButton(this.context, btEdit)
                 .withButton(btAddStep)
                 .withButton(btEditProg);
-        btEdit.setOnClickListener(view -> {
-            sb.expand();
-        });
+        btEdit.setOnClickListener(view -> sb.expand());
         btEditProg.setOnClickListener(view -> {
             ProgramAlert alert = new ProgramAlert()
-                    .withListener(null)
+                    .withListener(listener)
                     .withContext(vItem.getContext());
             ProgramAlert.getProgramAlert(alert, pos);
         });
-        btAddStep.setOnClickListener(view -> {
-            StepAlert.getStepAlert(stepAlert, programs.get(pos).getSteps().size(), pos);
-        });
+        btAddStep.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, programs.get(pos).getSteps().size(), pos));
 
         updateProgram();
         updateSteps();
@@ -118,7 +113,6 @@ public class ProgramFragment extends Fragment {
                 populateClv(context, cl, s, programs.get(pos).getSteps().size());
 
                 cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
-                //cl.setOnLongClickListener(view -> {ProgramAlert.getDeleteStepAlert(alert, fb, s.getStep(), pos); return true;});
 
                 fb.addView(cl);
             }

@@ -39,6 +39,7 @@
             android:layout_marginStart="10dp"
             android:textSize="@dimen/large_text"
             android:minWidth="140dp"
+            android:textColor="?attr/colorSecondary"
             app:layout_constraintStart_toEndOf="@id/tv_port"
             app:layout_constraintTop_toBottomOf="@id/title"/>
         <TextView
@@ -59,6 +60,7 @@
             android:textSize="@dimen/large_text"
             android:inputType="number"
             android:minWidth="80dp"
+            android:textColor="?attr/colorSecondary"
             app:layout_constraintStart_toEndOf="@id/tv_port"
             app:layout_constraintTop_toBottomOf="@id/et_ip"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
