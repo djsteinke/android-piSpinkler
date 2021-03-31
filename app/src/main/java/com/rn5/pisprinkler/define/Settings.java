@@ -37,9 +37,11 @@ public class Settings {
         String val = gson.toJson(this);
         try {
             if (file.exists() || (!file.exists() && file.createNewFile())) {
-                BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                bw.write(val);
-                bw.close();
+                if (file.canWrite() || file.setWritable(true)) {
+                    BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+                    bw.write(val);
+                    bw.close();
+                }
             }
         } catch (IOException e) {
             System.out.println("WriteException : " + e.getMessage());
@@ -56,12 +58,13 @@ public class Settings {
             while ((inputLine = br.readLine()) != null) {
                 sb.append(inputLine);
             }
+            Gson gson = new GsonBuilder().create();
+            return gson.fromJson(sb.toString(), Settings.class);
         } catch (IOException e) {
-            return new Settings(MainActivity.ip, MainActivity.port);
+            Settings settings = new Settings(MainActivity.ip, MainActivity.port);
+            settings.save();
+            return settings;
         }
-        Gson gson = new GsonBuilder().create();
-
-        return gson.fromJson(sb.toString(), Settings.class);
     }
 
 }

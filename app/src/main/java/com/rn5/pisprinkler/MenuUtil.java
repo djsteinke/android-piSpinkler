@@ -3,7 +3,11 @@ package com.rn5.pisprinkler;
 import android.content.Intent;
 import android.view.MenuItem;
 
+import com.rn5.pisprinkler.define.ProgramAlert;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import static com.rn5.pisprinkler.MainActivity.alert;
 
 public abstract class MenuUtil extends AppCompatActivity {
 
@@ -18,6 +22,9 @@ public abstract class MenuUtil extends AppCompatActivity {
                 break;
             case R.id.zone_item:
                 context.startActivity(new Intent(context, ZoneActivity.class));
+                break;
+            case R.id.url_item:
+                alert(context);
                 break;
             default:
                 return true;

@@ -24,6 +24,8 @@
     <string name="ip">IP</string>
     <string name="port">Port</string>
     <string name="device">Device Settings</string>
+    <string name="loading">…loading</string>
+    <string name="url">Device IP</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>

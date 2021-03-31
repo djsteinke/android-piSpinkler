@@ -200,6 +200,7 @@ public class ProgramAlert  {
         ArrayAdapter<Integer> aZone = new ArrayAdapter<>(alert.getContext(), R.layout.spinner_item, zoneIds);
         aZone.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sZone.setAdapter(aZone);
+        sZone.setSelection(s.getZone());
 
         EditText etTime = v.findViewById(R.id.et_time);
         EditText etPercent = v.findViewById(R.id.et_percent);

@@ -8,6 +8,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     public static int port = 1983;
     public static String ip = "192.168.0.152";
     public static File file;
-    private Settings settings;
+    private static Settings settings;
     private FabOption addZoneFab;
     private FabOption addProgramFab;
 
@@ -88,16 +89,16 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         ImageButton button = findViewById(R.id.button);
         ImageButton ipBtn = findViewById(R.id.ip_button);
         ipText = findViewById(R.id.ip_text);
-        String val = settings.getIp() + " : " + formatInt(settings.getPort());
+        String val = settings.getIp() + ":" + formatInt(settings.getPort());
         ipText.setText(val);
         ll_dots = findViewById(R.id.ll_dots);
 
         button.setOnClickListener(view -> click());
 
-        ipBtn.setOnClickListener(view -> alert());
+        ipBtn.setOnClickListener(view -> alert(this));
 
         pager = findViewById(R.id.pager);
-        pagerAdapter = new ProgramSwipeAdapter(this, programs.size());
+        pagerAdapter = new ProgramSwipeAdapter(this, this, programs.size());
         pager.setAdapter(pagerAdapter);
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -141,8 +142,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         }
     }
 
-    public void alert() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    public static void alert(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         View v = LayoutInflater.from(builder.getContext()).inflate(R.layout.popup_device,null);
         final EditText etIp = v.findViewById(R.id.et_ip);
@@ -157,8 +158,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         builder.setPositiveButton("OK", (dialog, which) -> {
             String ip = etIp.getText().toString();
             String port = etPort.getText().toString();
-            String val = ip + " : " + port;
-            ipText.setText(val);
+            String val = ip + ":" + port;
+            //ipText.setText(val);
             settings.setIp(ip);
             settings.setPort(Integer.parseInt(port));
             settings.save();
@@ -197,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
     @Override
     public void onCreateProgram() {
-        pagerAdapter = new ProgramSwipeAdapter(this, programs.size());
+        pagerAdapter = new ProgramSwipeAdapter(this, this, programs.size());
         pager.setAdapter(pagerAdapter);
         setLl_dots();
     }

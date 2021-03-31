@@ -17,9 +17,9 @@
             android:layout_height="wrap_content"
             android:id="@+id/name"
             android:textSize="@dimen/large_text"
-            android:textStyle="bold"
             android:gravity="center"
             android:text="Main"
+            android:textColor="?android:textColorSecondary"
             app:layout_constraintStart_toStartOf="@id/fb_details"
             app:layout_constraintTop_toTopOf="@id/ib_edit_program"
             app:layout_constraintBottom_toBottomOf="@id/ib_edit_program"/>
@@ -162,11 +162,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:layout_marginTop="10dp"
             app:justifyContent="flex_start"
             app:flexWrap="wrap"
             app:layout_constraintTop_toBottomOf="@id/fb_details"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toStartOf="@id/ib_edit_slide"
+            app:layout_constraintStart_toStartOf="parent">
         </com.google.android.flexbox.FlexboxLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

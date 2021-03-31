@@ -18,9 +18,11 @@ import com.rn5.pisprinkler.define.ProgramAlert;
 import com.rn5.pisprinkler.define.SlideButton;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import static com.rn5.pisprinkler.MainActivity.programs;
+import static com.rn5.pisprinkler.MainActivity.zones;
 import static com.rn5.pisprinkler.define.Constants.formatInt;
 import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
 import static com.rn5.pisprinkler.define.Constants.sdfTime;
@@ -79,18 +81,53 @@ public class ProgramFragment extends Fragment {
             if (cl != null) {
                 populateCl(cl, s);
             } else {
-                cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_view, fb, false);
+                cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_v, fb, false);
                 cl.setId(s.getStep());
 
-                populateCl(cl, s);
+                populateClv(context, cl, s, programs.get(pos).getSteps().size());
+                ProgramAlert alert = new ProgramAlert().withContext(context);
 
-                //cl.setOnClickListener(view -> ProgramAlert.getStepAlert(alert, fb, s.getStep(), pos));
+                cl.setOnClickListener(view -> ProgramAlert.getStepAlert(alert, fb, s.getStep(), pos));
                 //cl.setOnLongClickListener(view -> {ProgramAlert.getDeleteStepAlert(alert, fb, s.getStep(), pos); return true;});
 
                 fb.addView(cl);
             }
         }
         return vItem;
+    }
+
+    private ConstraintLayout populateClv(Context context, ConstraintLayout cl, Program.Step s, int size) {
+        TextView tvZ = cl.findViewById(R.id.zone_id);
+        tvZ.setText(formatInt(s.getZone() + 1));
+        int type = zones.get(s.getZone()).getType();
+        int bk;
+        switch (type) {
+            case 2:
+                bk = R.drawable.head_rotor;
+                break;
+            case 1:
+                bk = R.drawable.head_rotary;
+                break;
+            case 0:
+            default:
+                bk = R.drawable.head_fixed;
+                break;
+        }
+        tvZ.setBackground(ContextCompat.getDrawable(context, bk));
+        ImageView iv = cl.findViewById(R.id.arrow);
+        if (s.getStep() == size-1)
+            iv.setVisibility(View.GONE);
+        else
+            iv.setVisibility(View.VISIBLE);
+/*
+        TextView tvT = cl.findViewById(R.id.time);
+        String val = formatInt((s.getPercent() > 0 ? s.getPercent() : s.getTime())) + (s.getPercent() > 0 ? "%" : " MIN");
+        SpannableString ss = new SpannableString(val);
+        ss.setSpan(new RelativeSizeSpan(.75f), val.length() - (s.getPercent() > 0 ? 1 : 3), val.length(), 0); // set size
+        tvT.setText(ss);
+
+ */
+        return cl;
     }
 
     private ConstraintLayout populateCl(ConstraintLayout cl, Program.Step s) {

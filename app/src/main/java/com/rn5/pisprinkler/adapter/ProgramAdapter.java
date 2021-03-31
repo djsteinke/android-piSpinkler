@@ -111,6 +111,18 @@ public class ProgramAdapter extends RecyclerView.Adapter<ProgramAdapter.MyViewHo
 
     }
 
+    private ConstraintLayout populateClv(ConstraintLayout cl, Program.Step s) {
+        TextView tvZ = cl.findViewById(R.id.zone_id);
+        tvZ.setText(formatInt(s.getZone() + 1));
+
+        TextView tvT = cl.findViewById(R.id.time);
+        String val = formatInt((s.getPercent() > 0 ? s.getPercent() : s.getTime())) + (s.getPercent() > 0 ? "%" : " MIN");
+        SpannableString ss = new SpannableString(val);
+        ss.setSpan(new RelativeSizeSpan(.75f), val.length() - (s.getPercent() > 0 ? 1 : 3), val.length(), 0); // set size
+        tvT.setText(ss);
+        return cl;
+    }
+
     private ConstraintLayout populateCl(ConstraintLayout cl, Program.Step s) {
         TextView tvZ = cl.findViewById(R.id.fb_zone_id);
         tvZ.setText(formatInt(s.getZone() + 1));
