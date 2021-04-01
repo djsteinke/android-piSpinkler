@@ -26,6 +26,8 @@
     <string name="device">Device Settings</string>
     <string name="loading">…loading</string>
     <string name="url">Device IP</string>
+    <string name="history">History</string>
+    <string name="temperature">Temperature</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>

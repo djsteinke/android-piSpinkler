@@ -48,30 +48,6 @@
     </com.google.android.flexbox.FlexboxLayout>
 
     <TextView
-        android:id="@+id/main_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/loading"
-        android:gravity="start"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cl_pager" />
-
-    <!--
-    <ImageView
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:src="?attr/colorSecondary"
-        android:layout_marginStart="35dp"
-        android:layout_marginEnd="35dp"
-        app:layout_constraintTop_toTopOf="@id/cl_pager"
-        app:layout_constraintEnd_toEndOf="@id/zone_flex_box"
-        app:layout_constraintStart_toStartOf="@id/zone_flex_box"/>
-        -->
-
-
-    <TextView
         android:id="@+id/ll_program_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -108,6 +84,41 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/ll_temp_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingLeft="15dp"
+        android:paddingBottom="2dp"
+        android:layout_weight="2"
+        android:gravity="start"
+        android:textColor="@color/off_white"
+        android:text="@string/temperature"
+        android:layout_marginTop="10dp"
+        android:textSize="@dimen/med_text"
+        android:background="?attr/colorAccent"
+        app:layout_constraintTop_toBottomOf="@id/cl_pager"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ImageView
+        android:id="@+id/history"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        app:layout_constraintTop_toBottomOf="@id/ll_temp_title"
+        android:contentDescription="@string/history" />
+
+    <TextView
+        android:id="@+id/main_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/loading"
+        android:gravity="start"
+        app:layout_constraintBottom_toTopOf="@id/ip_ll"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/history" />
 
     <LinearLayout
         android:id="@+id/ip_ll"

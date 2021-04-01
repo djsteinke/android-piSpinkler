@@ -97,11 +97,14 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
             if (remoteView != null) {
                 DecimalFormat df0 = new DecimalFormat("#");
                 try {
-                    String txt = getFTempString((double) val.getDouble("temp")) + "\n";
-                    txt += df0.format((double) val.getDouble("humidity")) + "%";
-                    remoteView.setTextViewText(R.id.widget_text, txt);
-                    appWidgetManager.updateAppWidget(appWidgetId, remoteView);
-                    Log.d(TAG, txt);
+                    if (val.getString("type").equals("temp")) {
+                        JSONObject response = val.getJSONObject("response");
+                        String txt = getFTempString(response.getDouble("temp")) + "\n";
+                        txt += df0.format(response.getDouble("humidity")) + "%";
+                        remoteView.setTextViewText(R.id.widget_text, txt);
+                        appWidgetManager.updateAppWidget(appWidgetId, remoteView);
+                        Log.d(TAG, txt);
+                    }
                 } catch (JSONException | NullPointerException e) {
                     Log.e(TAG, "onResponse() ERROR: " + e.getMessage());
                 }
