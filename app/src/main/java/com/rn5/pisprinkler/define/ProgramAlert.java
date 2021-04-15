@@ -155,7 +155,7 @@ public class ProgramAlert  {
                 alert.getAdapter().notifyDataSetChanged();
             if (alert.getListener() != null) {
                 if (add)
-                    alert.getListener().onCreateProgram();
+                    alert.getListener().onCreateProgram(true);
                 else
                     alert.getListener().onUpdateProgram(pos);
             }
@@ -167,7 +167,7 @@ public class ProgramAlert  {
             builder.setNeutralButton("Delete", ((dialog, which) -> {
                 programs.remove(pos);
                 if (alert.getListener() != null) {
-                    alert.getListener().onCreateProgram();
+                    alert.getListener().onCreateProgram(true);
                 }
             }));
         }

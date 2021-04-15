@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     private LinearLayout ll_dots;
     private ImageView iv_history;
 
+    private static final int historyDays = 4;
     private int iHistW = 0;
     private int iHistH = 0;
     private int currProgram = 0;
@@ -266,11 +267,12 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     @Override
-    public void onCreateProgram() {
+    public void onCreateProgram(boolean save) {
         pagerAdapter = new ProgramSwipeAdapter(this, this, this, programs.size());
         pager.setAdapter(pagerAdapter);
         setLl_dots();
-        saveProgram();
+        if (save)
+            saveProgram();
     }
 
     @Override
@@ -376,10 +378,10 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         Canvas canvas = new Canvas(bitmap);
 
         int xOff = 80;
-        long minMs = getMinMs(2);
+        long minMs = getMinMs(historyDays-1);
         double[] mm = getMaxMin();
-        double xMs = (double)(iHistW-xOff)/(3*24*3600*1000);
-        double yD = (double)iHistH/(double)(mm[0]-mm[1]);
+        double xMs = (double)(iHistW-xOff)/(historyDays*24*3600*1000);
+        double yD = (double)iHistH/(mm[0]-mm[1]);
 
         Paint pTemp = new Paint();
         pTemp.setStyle(Paint.Style.STROKE);
@@ -411,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             canvas.drawText(formatInt(i)+"\u00B0", xOff-10, (float)y+getPxFromDp(5f), pTxt);
             i -= 10;
         }
-        for (int d=0; d<2; d++) {
+        for (int d=0; d<historyDays-1; d++) {
             double x = xOff+(getMinMs(d)-minMs)*xMs;
             Path p = new Path();
             p.moveTo((float)x, 0);
@@ -422,16 +424,18 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         Path pT = new Path();
         boolean move = true;
         for (History.Temp t : getTempList()) {
-            tAvg = getAvg(tAvg, t.getT());
+            getAvg(tAvg, t.getT());
             double tmp = tAvg.get(tAvg.size()-1);
             double x = xOff+(t.getTime().getTime()-minMs)*xMs;
             double fTmp = getTempF(tmp);
             double y = (mm[0]-fTmp)*yD;
-            if (move)
-                pT.moveTo((float)x, (float)y);
-            else
-                pT.lineTo((float)x, (float)y);
-            move = false;
+            if (x >= xOff) {
+                if (move)
+                    pT.moveTo((float) x, (float) y);
+                else
+                    pT.lineTo((float) x, (float) y);
+                move = false;
+            }
         }
 
         canvas.drawPath(pT, pTemp);
@@ -490,7 +494,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 programs.add(newP);
         }
         loadFlexBox();
-        this.onCreateProgram();
+        this.onCreateProgram(false);
     }
 
     private void getSetup() {
@@ -500,7 +504,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
     private void getHistory() {
         UrlAsync async = new UrlAsync().withListener(this);
-        async.execute("GET","getTemp/3");
+        async.execute("GET","getTemp/" + historyDays);
     }
 
     public void addZone(View v) {

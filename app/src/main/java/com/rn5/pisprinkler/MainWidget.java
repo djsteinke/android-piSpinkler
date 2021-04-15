@@ -19,8 +19,8 @@ import static com.rn5.pisprinkler.MainActivity.getTempString;
 
 public class MainWidget extends AppWidgetProvider {
     private static final String TAG = MainWidget.class.getSimpleName();
-    private static final String ACTION = "com.rn5.action.GARAGE_DOOR_CLICK";
-    private Context context;
+    private static final String ACTION = "com.rn5.action.UPDATE_TEMP";
+    private static final String APP_WIDGET_ID = "com.rn5.extra.APP_WIDGET_ID";
 
     @Override
     public void onEnabled(Context context) {
@@ -40,8 +40,9 @@ public class MainWidget extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_main);
 
             Intent intent = new Intent(context, getClass());
+            intent.setAction(ACTION);
+            intent.putExtra(APP_WIDGET_ID, appWidgetId);
             views.setOnClickPendingIntent(R.id.widget_text, PendingIntent.getBroadcast(context, 0, intent, 0));
-
 
             // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -54,6 +55,13 @@ public class MainWidget extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        if (intent.getAction().equals(ACTION)) {
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_main);
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            int appWidgetId = intent.getIntExtra(APP_WIDGET_ID, 0);
+            UrlAsync async = new UrlAsync().forWidget(views, appWidgetManager, appWidgetId);
+            async.execute("GET","getTemp");
+        }
         Log.d(TAG, "onReceive(" + intent.getAction() + ")");
     }
 

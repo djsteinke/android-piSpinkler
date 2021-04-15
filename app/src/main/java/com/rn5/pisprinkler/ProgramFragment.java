@@ -47,6 +47,7 @@ public class ProgramFragment extends Fragment {
     private TextView tv_interval;
     private TextView next;
 
+    public ProgramFragment() {}
     public ProgramFragment(Context context) {
         this.context = context;
     }
@@ -93,11 +94,13 @@ public class ProgramFragment extends Fragment {
     }
 
     public void updateProgram() {
-        name.setText(programs.get(pos).getName());
-        tv_start.setText(sdfTime.format(programs.get(pos).getStartTime()));
-        String interval = programs.get(pos).getInterval() + " DAYS";
-        tv_interval.setText(interval);
-        next.setText(sdfDisplay.format(programs.get(pos).getNextRunTime()));
+        if (programs.size() > 0) {
+            name.setText(programs.get(pos).getName());
+            tv_start.setText(sdfTime.format(programs.get(pos).getStartTime()));
+            String interval = programs.get(pos).getInterval() + " DAYS";
+            tv_interval.setText(interval);
+            next.setText(sdfDisplay.format(programs.get(pos).getNextRunTime()));
+        }
     }
 
     public void updateSteps() {
