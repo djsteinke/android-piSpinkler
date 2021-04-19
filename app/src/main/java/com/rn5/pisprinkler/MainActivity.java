@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     private int iHistW = 0;
     private int iHistH = 0;
     private int currProgram = 0;
-    public static int port = 1983;
+    public static int port = 1984;
     public static String ip = "192.168.0.152";
     public static File file;
     private static Settings settings;
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     private boolean setFilePath() {
-        file = this.getExternalFilesDir("Settings");
+        file = this.getFilesDir();
         boolean result = file != null && (file.exists() || file.mkdir());
         return result && (file.canWrite() || file.setWritable(true, true));
     }

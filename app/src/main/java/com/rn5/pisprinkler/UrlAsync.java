@@ -53,7 +53,8 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
     protected JSONObject doInBackground(String... urls) {
         try {
             String finalUrl = urlString + "/" + urls[1];
-            Log.d(TAG, "doInBackground() " + urls[0] + " " + finalUrl);
+            String logMsg = "doInBackground() " + urls[0] + " " + finalUrl;
+
             URL url = new URL(finalUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setReadTimeout(10000);
@@ -64,7 +65,6 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
             if (urls[0].equals("GET"))
                 con.connect();
             else if (urls[0].equals("POST")) {
-                // TODO "POST" method
                 con.setRequestMethod("POST");
                 con.setDoOutput(true);
                 BufferedOutputStream out = new BufferedOutputStream(con.getOutputStream());
@@ -76,6 +76,8 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
                 con.connect();
             } else
                 return null;
+            logMsg += " Response[" + con.getResponseCode() + "]";
+            Log.d(TAG,logMsg);
             BufferedReader br = new BufferedReader(new InputStreamReader((con.getInputStream())));
             StringBuilder sb = new StringBuilder();
             String output;
@@ -84,6 +86,7 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
             }
             return new JSONObject(sb.toString());
         } catch (IOException | JSONException e) {
+            e.printStackTrace();
             Log.e(TAG,"doInBackground() ERROR: " + e.getMessage());
             return null;
         }

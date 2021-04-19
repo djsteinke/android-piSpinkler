@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -39,30 +40,32 @@ public class MainWidget extends AppWidgetProvider {
             // to the button
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_main);
 
-            Intent intent = new Intent(context, getClass());
+            Intent intent = new Intent(context, MainWidget.class);
             intent.setAction(ACTION);
-            intent.putExtra(APP_WIDGET_ID, appWidgetId);
-            views.setOnClickPendingIntent(R.id.widget_text, PendingIntent.getBroadcast(context, 0, intent, 0));
+            Bundle bundle = new Bundle();
+            bundle.putInt(APP_WIDGET_ID, appWidgetId);
+            intent.putExtras(bundle);
+            views.setOnClickPendingIntent(R.id.widget_text, PendingIntent.getBroadcast(context, appWidgetId, intent, 0));
 
-            // Tell the AppWidgetManager to perform an update on the current app widget
             appWidgetManager.updateAppWidget(appWidgetId, views);
 
-            UrlAsync async = new UrlAsync().forWidget(views, appWidgetManager, appWidgetId);
-            async.execute("GET","getTemp");
         }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        if (intent.getAction().equals(ACTION)) {
-            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_main);
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            int appWidgetId = intent.getIntExtra(APP_WIDGET_ID, 0);
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_main);
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        Bundle bundle = intent.getExtras();
+        int appWidgetId = -1;
+        if (bundle != null)
+            appWidgetId = bundle.getInt(APP_WIDGET_ID, -1);
+        if (appWidgetId > 0) {
             UrlAsync async = new UrlAsync().forWidget(views, appWidgetManager, appWidgetId);
-            async.execute("GET","getTemp");
+            async.execute("GET", "getTemp");
         }
-        Log.d(TAG, "onReceive(" + intent.getAction() + ")");
+        Log.d(TAG, "onReceive(" + intent.getAction() + ") appWidgetId(" + appWidgetId + ")");
     }
 
 }
