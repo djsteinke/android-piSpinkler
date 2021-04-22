@@ -264,6 +264,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     @Override
     public void onCreateZone() {
         loadFlexBox();
+        Gson gson = new Gson();
+        UrlAsync async = new UrlAsync();
+        async.execute("POST","update/zones", gson.toJson(zones));
     }
 
     @Override
