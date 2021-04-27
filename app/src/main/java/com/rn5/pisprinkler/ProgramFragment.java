@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.rn5.pisprinkler.define.ProgramAlert;
@@ -46,6 +47,7 @@ public class ProgramFragment extends Fragment {
     private TextView tv_start;
     private TextView tv_interval;
     private TextView next;
+    private ImageView active;
 
     public ProgramFragment() {}
     public ProgramFragment(Context context) {
@@ -70,14 +72,17 @@ public class ProgramFragment extends Fragment {
         tv_interval = vItem.findViewById(R.id.tv_interval);
         next = vItem.findViewById(R.id.next);
         fb = vItem.findViewById(R.id.step_flex_box);
+        active = vItem.findViewById(R.id.iv_active);
 
         ImageButton btEdit = vItem.findViewById(R.id.ib_edit_slide);
         ImageButton btAddStep = vItem.findViewById(R.id.ib_add_step);
         ImageButton btEditProg = vItem.findViewById(R.id.ib_edit_program);
+        ImageButton btRun = vItem.findViewById(R.id.ib_run_program);
         stepAlert = new StepAlert(context).withListener(this.listener);
         SlideButton sb = new SlideButton(this.context, btEdit)
                 .withButton(btAddStep)
-                .withButton(btEditProg);
+                .withButton(btEditProg)
+                .withButton(btRun);
         btEdit.setOnClickListener(view -> sb.expand());
         btEditProg.setOnClickListener(view -> {
             ProgramAlert alert = new ProgramAlert()
@@ -86,6 +91,13 @@ public class ProgramFragment extends Fragment {
             ProgramAlert.getProgramAlert(alert, pos);
         });
         btAddStep.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, programs.get(pos).getSteps().size(), pos));
+        btRun.setOnClickListener(view -> {
+            UrlAsync async = new UrlAsync();
+            async.execute("GET","runProgram/" + programs.get(pos).getName());
+            String txt = "Program " + programs.get(pos).getName() + " Started";
+            Toast.makeText(context, txt, Toast.LENGTH_SHORT).show();
+            sb.expand();
+        });
 
         if (programs.size() > 0) {
             updateProgram();
@@ -101,6 +113,7 @@ public class ProgramFragment extends Fragment {
         String interval = programs.get(pos).getInterval() + " DAYS";
         tv_interval.setText(interval);
         next.setText(sdfDisplay.format(programs.get(pos).getNextRunTime()));
+        active.setActivated(programs.get(pos).isActive());
     }
 
     public void updateSteps() {

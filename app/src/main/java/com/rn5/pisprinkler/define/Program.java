@@ -5,15 +5,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Program {
     private static final String TAG = Program.class.getSimpleName();
     private String name;
     private Date nextRunTime;
     private Date startTime;
     private int interval;
+    private boolean active;
     private List<Step> steps = new ArrayList<>();
 
     public Program() {}
@@ -33,6 +36,10 @@ public class Program {
         this.interval = val;
         return this;
     }
+    public Program isActive(boolean val) {
+        this.active = val;
+        return this;
+    }
     public Program setNextRunTime() {
         Calendar stCal = Calendar.getInstance();
         stCal.setTime(startTime);
@@ -45,8 +52,8 @@ public class Program {
         return this;
     }
 
-    public void addStep(int step, int zone, int percent, int time) {
-        this.steps.add(new Step(step, zone, percent, time));
+    public void addStep(int step, int zone, int percent, int time, int wait) {
+        this.steps.add(new Step(step, zone, percent, time, wait));
     }
 
     public void addStep(Step step) {
@@ -67,6 +74,5 @@ public class Program {
             }
         }
     }
-
 
 }

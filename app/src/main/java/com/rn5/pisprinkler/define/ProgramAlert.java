@@ -104,11 +104,14 @@ public class ProgramAlert  {
         final TextView tvStartTime = v.findViewById(R.id.tv_run_time);
         final EditText etInterval = v.findViewById(R.id.et_interval);
         final EditText etName = v.findViewById(R.id.et_name);
+        final CheckBox cbActive = v.findViewById(R.id.cb_active);
+
         if (pos < programs.size()) {
             etName.setText(programs.get(pos).getName());
             etInterval.setText(formatInt(programs.get(pos).getInterval()));
             tvStartTime.setText(sdfTime.format(programs.get(pos).getStartTime()));
             alert.setStartDt(programs.get(pos).getStartTime());
+            cbActive.setChecked(programs.get(pos).isActive());
         }
         etName.requestFocus();
         TimePickerDialog.OnTimeSetListener listener = (timePicker, hour, min) -> {
@@ -144,10 +147,12 @@ public class ProgramAlert  {
                 programs.get(pos).setStartTime(dt);
                 programs.get(pos).setInterval(interval);
                 programs.get(pos).setName(name);
+                programs.get(pos).isActive(cbActive.isChecked());
             } else {
                 Program program = new Program().withName(name)
                         .withStartTime(dt)
                         .withInterval(interval)
+                        .isActive(cbActive.isChecked())
                         .setNextRunTime();
                 programs.add(program);
             }
@@ -280,7 +285,7 @@ public class ProgramAlert  {
                     tvT.setText(ss);
                     cl.setOnClickListener(view1 -> ProgramAlert.getStepAlert(alert, fb, pos, pPos));
                     fb.addView(cl);
-                    programs.get(pPos).addStep(pos, sZone.getSelectedItemPosition(), percent, time);
+                    programs.get(pPos).addStep(pos, sZone.getSelectedItemPosition(), percent, time, 0);
                 } else {
                     for (Step pS : programs.get(pPos).getSteps()) {
                         if (pS.getStep() == pos) {

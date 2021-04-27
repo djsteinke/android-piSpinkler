@@ -62,7 +62,7 @@
         android:minWidth="30dp"
         android:gravity="center"
         android:hint="2"
-        app:layout_constraintTop_toBottomOf="@id/tv1"
+        app:layout_constraintTop_toBottomOf="@id/ib_run_time"
         app:layout_constraintStart_toStartOf="@id/tv_run_time"/>
     <TextView
         android:id="@+id/tv3"
@@ -75,4 +75,20 @@
         app:layout_constraintBottom_toBottomOf="@id/et_interval"
         app:layout_constraintStart_toEndOf="@id/et_interval"/>
 
+    <TextView
+        android:id="@+id/tv4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text"
+        android:gravity="center"
+        android:text="@string/active"
+        app:layout_constraintTop_toTopOf="@id/cb_active"
+        app:layout_constraintBottom_toBottomOf="@id/cb_active"
+        app:layout_constraintStart_toStartOf="parent"/>
+    <CheckBox
+        android:id="@+id/cb_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/et_interval"
+        app:layout_constraintStart_toStartOf="@id/et_interval"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

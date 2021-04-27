@@ -133,6 +133,36 @@
             app:layout_constraintStart_toStartOf="@id/cb_time"
             app:layout_constraintTop_toTopOf="@id/et_percent"
             app:layout_constraintBottom_toBottomOf="@id/et_percent"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/step_delay"
+            android:text="@string/delay"
+            android:textSize="@dimen/text"
+            app:layout_constraintEnd_toEndOf="@id/step_percent"
+            app:layout_constraintTop_toTopOf="@id/et_delay"
+            app:layout_constraintBottom_toBottomOf="@id/et_delay"/>
+        <EditText
+            android:id="@+id/et_delay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50dp"
+            android:hint="0"
+            android:gravity="center"
+            android:textColor="?attr/colorSecondary"
+            android:inputType="number"
+            app:layout_constraintStart_toStartOf="@id/et_percent"
+            app:layout_constraintTop_toBottomOf="@id/et_percent"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/step_del"
+            android:text="@string/min"
+            android:textAllCaps="true"
+            android:textSize="@dimen/small_text"
+            app:layout_constraintStart_toEndOf="@id/et_delay"
+            app:layout_constraintTop_toTopOf="@id/et_delay"
+            app:layout_constraintBottom_toBottomOf="@id/et_delay"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

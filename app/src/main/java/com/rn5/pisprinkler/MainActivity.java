@@ -9,7 +9,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -165,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             }
             v.setBackground(ContextCompat.getDrawable(this, typeDr));
             tv.setText(zoneId);
-            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, null, z.getZone()));
+            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, this, z.getZone()));
             tv.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this, null, this, z.getZone());
                 return true;});
             flexboxLayout.addView(v);
@@ -559,5 +561,10 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         super.onResume();
         if (lastRefresh < (Calendar.getInstance().getTimeInMillis()-(15f*60*1000)))
             getHistory();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 }

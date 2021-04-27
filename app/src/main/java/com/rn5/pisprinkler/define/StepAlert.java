@@ -64,6 +64,7 @@ public class StepAlert {
         EditText etPercent = v.findViewById(R.id.et_percent);
         TextView tvId = v.findViewById(R.id.step_id);
         tvId.setText(String.format(Locale.US, "%d", stepId));
+        EditText etWait = v.findViewById(R.id.et_delay);
 
         CheckBox cbTime = v.findViewById(R.id.cb_time);
         CheckBox cbPercent = v.findViewById(R.id.cb_percent);
@@ -74,6 +75,7 @@ public class StepAlert {
             cbTime.setChecked(!b);
         });
 
+        etWait.setText("0");
         if (s != null) {
             if (s.getTime() > 0) {
                 etTime.setText(formatInt(s.getTime()));
@@ -82,6 +84,7 @@ public class StepAlert {
                 etPercent.setText(formatInt(s.getPercent()));
                 cbPercent.setChecked(true);
             }
+            etWait.setText(formatInt(s.getWait()));
         }
 
         builder.setView(v);
@@ -121,18 +124,22 @@ public class StepAlert {
                     Toast.makeText(alert.getContext(), "Time selected. Please enter a value.", Toast.LENGTH_LONG).show();
             }
 
+            int wait = Integer.parseInt(etWait.getText().toString());
+
             if (!bError) {
                 if (sPos >= programs.get(pPos).getSteps().size()) {
                     finalS.setPercent(percent);
                     finalS.setTime(time);
                     finalS.setStep(sPos);
                     finalS.setZone(sZone.getSelectedItemPosition());
+                    finalS.setWait(wait);
                     programs.get(pPos).addStep(finalS);
                 } else {
                     for (Step pS : programs.get(pPos).getSteps()) {
                         if (pS.getStep() == sPos) {
                             pS.setPercent(percent);
                             pS.setTime(time);
+                            pS.setWait(wait);
                             pS.setZone(sZone.getSelectedItemPosition());
                         }
                     }

@@ -28,6 +28,8 @@
     <string name="url">Device IP</string>
     <string name="history">History</string>
     <string name="temperature">Temperature</string>
+    <string name="active">Active</string>
+    <string name="delay">Delay</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>
