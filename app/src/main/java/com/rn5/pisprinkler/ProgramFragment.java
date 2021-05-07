@@ -93,7 +93,7 @@ public class ProgramFragment extends Fragment {
         btAddStep.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, programs.get(pos).getSteps().size(), pos));
         btRun.setOnClickListener(view -> {
             UrlAsync async = new UrlAsync();
-            async.execute("GET","runProgram/" + programs.get(pos).getName());
+            async.execute("GET","program/run/" + programs.get(pos).getName());
             String txt = "Program " + programs.get(pos).getName() + " Started";
             Toast.makeText(context, txt, Toast.LENGTH_SHORT).show();
             sb.expand();

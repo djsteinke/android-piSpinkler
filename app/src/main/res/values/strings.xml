@@ -30,6 +30,7 @@
     <string name="temperature">Temperature</string>
     <string name="active">Active</string>
     <string name="delay">Delay</string>
+    <string name="current">Current</string>
 
     <string-array name="zone_types">
         <item>FIXED</item>

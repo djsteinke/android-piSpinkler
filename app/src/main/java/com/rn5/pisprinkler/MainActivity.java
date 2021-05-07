@@ -4,20 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.TextUtils;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -36,9 +36,9 @@ import android.widget.Toast;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.nambimobile.widgets.efab.FabOption;
 import com.rn5.pisprinkler.adapter.ProgramSwipeAdapter;
+import com.rn5.pisprinkler.define.Current;
+import com.rn5.pisprinkler.define.StatusAlert;
 import com.rn5.pisprinkler.define.History;
 import com.rn5.pisprinkler.define.ProgramAlert;
 import com.rn5.pisprinkler.listener.CreateListener;
@@ -54,16 +54,17 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import static com.rn5.pisprinkler.MenuUtil.menuItemSelector;
 import static com.rn5.pisprinkler.define.Constants.formatInt;
 import static com.rn5.pisprinkler.define.Constants.sdf;
+import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
+import static com.rn5.pisprinkler.define.Constants.sdfTime;
 
 public class MainActivity extends AppCompatActivity implements UrlResponseListener, CreateListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -82,13 +83,12 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     public static String ip = "192.168.0.152";
     public static File file;
     private static Settings settings;
-    private FabOption addZoneFab;
-    private FabOption addProgramFab;
     private long lastRefresh = 0;
 
     public static final List<Program> programs = new ArrayList<>();
     public static final List<Zone> zones = new ArrayList<>();
     public static final List<History> history = new ArrayList<>();
+    public static Current current;
 
     private ViewPager2 pager;
     private FragmentStateAdapter pagerAdapter;
@@ -231,6 +231,85 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         async.execute("POST","update/programs", gson.toJson(programs));
     }
 
+    private void loadDelay(JSONObject object) {
+        try {
+            String action = object.getString("action");
+            String status = object.getString("status");
+            if (status.equals("success")) {
+                if (action.equals("set")) {
+                    String dt = object.getString("date");
+                    Date delay = sdf.parse(dt);
+                    current.getProgram().setDelay(dt);
+                    Toast.makeText(this, "Delay expires at " + dt, Toast.LENGTH_SHORT).show();
+                    setStatus("Delay until " + sdfDisplay.format(delay));
+                } else if (action.equals("cancel")) {
+                    Toast.makeText(this, "Delay cancelled.", Toast.LENGTH_SHORT).show();
+                    cancelStatus();
+                }
+            } else {
+                String msg = action + " Delay Failed.";
+                msg = capitalizeString(msg);
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            }
+        } catch (JSONException | ParseException e) {
+            Log.e(TAG, "loadDelay() error : " + e.getMessage());
+            Toast.makeText(this, "Delay not set. Request failed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadProgram(JSONObject object) {
+        try {
+            String action = object.getString("action");
+            String status = object.getString("status");
+            if (status.equals("success")) {
+                if (action.equals("cancel")) {
+                    Toast.makeText(this, "Program cancelled.", Toast.LENGTH_SHORT).show();
+                    cancelStatus();
+                }
+            } else {
+                String msg = action + " Program Failed.";
+                msg = capitalizeString(msg);
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "loadProgram() error : " + e.getMessage());
+            Toast.makeText(this, "Program request failed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void cancelStatus() {
+        LinearLayout llStatus = findViewById(R.id.ll_status);
+        ImageButton ibStatus = findViewById(R.id.ib_status);
+        llStatus.setVisibility(View.GONE);
+        ibStatus.setVisibility(View.GONE);
+    }
+
+    private void setStatus(final String value) {
+        LinearLayout llStatus = findViewById(R.id.ll_status);
+        TextView tvStatus = findViewById(R.id.tv_status);
+        ImageButton ibStatus = findViewById(R.id.ib_status);
+        llStatus.setVisibility(View.VISIBLE);
+        ibStatus.setVisibility(View.VISIBLE);
+        tvStatus.setText(value);
+        ibStatus.setOnClickListener(view -> {
+            if (value.contains("Delay until")) {
+                cancelDelay();
+            } else if (value.contains("running")) {
+                cancelProgram();
+            }
+        });
+    }
+
+    public static String capitalizeString(String str) {
+        String retStr = str;
+        try { // We can face index out of bound exception if the string is null
+            retStr = str.substring(0, 1).toUpperCase() + str.substring(1);
+        }catch (Exception e){
+            Log.e(TAG, "capitalizeString() error: " + e.getMessage());
+        }
+        return retStr;
+    }
+
     @Override
     public void onUpdateProgram(int pPos) {
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
@@ -295,6 +374,12 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 case "history":
                     loadHistory(response);
                     break;
+                case "delay":
+                    loadDelay(response);
+                    break;
+                case "program":
+                    loadProgram(response);
+                    break;
                 default:
                     break;
             }
@@ -326,11 +411,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         mm[1] = getTempF(mm[1]);
         int x = (int) mm[1] - (mm[1]>=0?0:10);
         Log.d(TAG, "getMaxMin " + mm[0] + " " + mm[1]);
-        mm[1] = (double) ((x/10)*10);
-        //mm[1] = (double) (x-(5-Math.abs(x%5)));
+        mm[1] = (double)(x/10)*10;
         x = (int) mm[0] + 10;
-        mm[0] = (double) ((x/10)*10);
-        //mm[0] = (double) (x+(5-x%5));
+        mm[0] = (double)(x/10)*10;
         Log.d(TAG, "getMaxMin " + mm[0] + " " + mm[1]);
         return mm;
     }
@@ -351,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             Log.d("getTempList()", sdf.format(h.getDt()));
             ret.addAll(h.getHistory());
         }
-        Collections.sort(ret, History.Temp.comparator);
+        ret.sort(History.Temp.comparator);
         return ret;
     }
 
@@ -467,12 +550,51 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     private void loadTemp(JSONObject val) throws JSONException {
         DecimalFormat df0 = new DecimalFormat("#");
 
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.setDateFormat(History.Temp.dateFormat);
+        Gson gson = gsonBuilder.create();
+        current = gson.fromJson(val.toString(), Current.class);
+        Log.d(TAG,"loadTemp() " + current.toString());
+
+        String cur = getFTempString(current.getTemp()) + " @ ";
+        int ss_l = cur.length();
+        cur += "" + df0.format(current.getHumidity()) + "%";
+        SpannableString ss = new SpannableString(cur);
+        ss.setSpan(new RelativeSizeSpan(.85f), ss_l-5, ss_l, 0);
+        ss.setSpan(new RelativeSizeSpan(.85f), ss.length()-1, ss.length(), 0);
+        TextView tv = findViewById(R.id.tv_current);
+        tv.setText(ss);
+        if (current.getProgram().getName() != null) {
+            int step_cnt = 0;
+            for (Program p : programs) {
+                if (p.getName().equals(current.getProgram().getName()))
+                    step_cnt = p.getSteps().size();
+            }
+            cur = current.getProgram().getName() + " running Step " + current.getProgram().getStep() + " of " + step_cnt + " - " +
+                    current.getProgram().getTime() + " of " + current.getProgram().getRunTime()/60 + " min";
+            setStatus(cur);
+        } else if (!TextUtils.isEmpty(current.getProgram().getDelay())) {
+            try {
+                String dt = current.getProgram().getDelay();
+                Date delay = sdf.parse(dt);
+                current.getProgram().setDelay(dt);
+                Toast.makeText(this, "Delay expires at " + dt, Toast.LENGTH_SHORT).show();
+                setStatus("Delay until " + sdfDisplay.format(delay));
+            } catch (ParseException e) {
+                Log.e(TAG, "loadTemp() error Delay date parse failed. " + e.getMessage());
+                Toast.makeText(this, "Load Delay date failed.", Toast.LENGTH_SHORT).show();
+            }
+        }
+            cur = "";
+        tv = findViewById(R.id.tv_current_prog);
+        tv.setText(cur);
+
         String txt = "cT: " + getTempString(val.getDouble("temp")) + "\n";
         txt += "cH: " + df0.format(val.getDouble("humidity")) + "%\n";
-        txt += "aT: " + getTempString(val.getDouble("avg_temp")) + "\n";
-        txt += "aH: " + df0.format(val.getDouble("avg_humidity")) + "%\n";
-        txt += "\u02C4T: " + getTempString(val.getDouble("temp_max")) + "\n";
-        txt += "\u02C5T: " + getTempString(val.getDouble("temp_min")) + "\n";
+        txt += "aT: " + getTempString(val.getDouble("avgTemp")) + "\n";
+        txt += "aH: " + df0.format(val.getDouble("avgHumidity")) + "%\n";
+        txt += "\u02C4T: " + getTempString(val.getDouble("tempMax")) + "\n";
+        txt += "\u02C5T: " + getTempString(val.getDouble("tempMin")) + "\n";
 
         if (mainText != null) {
             mainText.setText(txt);
@@ -523,13 +645,31 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         ProgramAlert.getProgramAlert(alert, programs.size());
     }
 
+    public void setDelay(View v) {
+        new StatusAlert().withContext(this)
+                .withListener(this)
+                .setDelay();
+    }
+
+    public void cancelDelay() {
+        new StatusAlert().withContext(this)
+                .withListener(this)
+                .cancelDelay();
+    }
+
+    public void cancelProgram() {
+        new StatusAlert().withContext(this)
+                .withListener(this)
+                .cancelProgram();
+    }
+
     public static String getTempString(double c) {
         DecimalFormat df1 = new DecimalFormat("#.#");
         return df1.format(c) + "\u00B0C [" + df1.format(getTempF(c)) + "\u00B0F]";
     }
 
     public static String getFTempString(double c) {
-        DecimalFormat df1 = new DecimalFormat("#.#");
+        DecimalFormat df1 = new DecimalFormat("#");
         return df1.format(getTempF(c)) + "\u00B0F";
     }
 
