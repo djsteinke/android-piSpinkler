@@ -38,6 +38,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.rn5.pisprinkler.adapter.ProgramSwipeAdapter;
 import com.rn5.pisprinkler.define.Current;
+import com.rn5.pisprinkler.define.Setup;
 import com.rn5.pisprinkler.define.StatusAlert;
 import com.rn5.pisprinkler.define.History;
 import com.rn5.pisprinkler.define.ProgramAlert;
@@ -64,7 +65,6 @@ import static com.rn5.pisprinkler.MenuUtil.menuItemSelector;
 import static com.rn5.pisprinkler.define.Constants.formatInt;
 import static com.rn5.pisprinkler.define.Constants.sdf;
 import static com.rn5.pisprinkler.define.Constants.sdfDisplay;
-import static com.rn5.pisprinkler.define.Constants.sdfTime;
 
 public class MainActivity extends AppCompatActivity implements UrlResponseListener, CreateListener {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -83,11 +83,12 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     public static String ip = "192.168.0.152";
     public static File file;
     private static Settings settings;
+    private static Setup setup;
     private long lastRefresh = 0;
 
-    public static final List<Program> programs = new ArrayList<>();
-    public static final List<Zone> zones = new ArrayList<>();
-    public static final List<History> history = new ArrayList<>();
+    public static List<Program> programs = new ArrayList<>();
+    public static List<Zone> zones = new ArrayList<>();
+    public static List<History> history = new ArrayList<>();
     public static Current current;
 
     private ViewPager2 pager;
@@ -104,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             Toast.makeText(this, "File Path Creation Failed.", Toast.LENGTH_SHORT).show();
         }
         settings = Settings.load();
-        getSetup();
         lastRefresh = Calendar.getInstance().getTimeInMillis();
 
         flexboxLayout = findViewById(R.id.zone_flex_box);
@@ -129,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
         button.setOnClickListener(view -> click());
 
+        getSetup();
+
         pager = findViewById(R.id.pager);
         pagerAdapter = new ProgramSwipeAdapter(this, this, this, programs.size());
         pager.setAdapter(pagerAdapter);
@@ -140,12 +142,24 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 setLl_dots();
             }
         });
+
+        setup = Setup.fromFile();
+        if (setup.getId() != null)
+            processSetup();
     }
 
     public void click() {
         Log.d(TAG,"click()");
         UrlAsync async = new UrlAsync().withListener(this);
         async.execute("GET","getTemp");
+    }
+
+    private void processSetup() {
+        programs = setup.getPrograms();
+        zones = setup.getZones();
+        history = setup.getHistories();
+        loadFlexBox();
+        onCreateProgram(false);
     }
 
     private void loadFlexBox() {
@@ -229,6 +243,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         Gson gson = gsonBuilder.create();
         UrlAsync async = new UrlAsync();
         async.execute("POST","update/programs", gson.toJson(programs));
+        setup.setPrograms(programs);
+        setup.toFile();
     }
 
     private void loadDelay(JSONObject object) {
@@ -348,6 +364,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         Gson gson = new Gson();
         UrlAsync async = new UrlAsync();
         async.execute("POST","update/zones", gson.toJson(zones));
+        setup.setZones(zones);
+        setup.toFile();
     }
 
     @Override
@@ -543,6 +561,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 history.add(newH);
         }
         Log.d(TAG, "loadHistory() " + history);
+        setup.setHistories(history);
+        setup.toFile();
         drawHistory();
         lastRefresh = Calendar.getInstance().getTimeInMillis();
     }
@@ -602,9 +622,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     private void loadSetup(JSONObject val) throws JSONException {
-        JSONObject setup = val.getJSONObject("setup");
-        JSONArray jPrograms = setup.getJSONArray("programs");
-        JSONArray jZones = setup.getJSONArray("zones");
+        JSONObject in = val.getJSONObject("setup");
+        JSONArray jPrograms = in.getJSONArray("programs");
+        JSONArray jZones = in.getJSONArray("zones");
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setDateFormat("yyyy-MM-dd hh:mm:ss");
         Gson gson = gsonBuilder.create();
@@ -621,6 +641,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 programs.add(newP);
         }
         loadFlexBox();
+        setup.setPrograms(programs);
+        setup.setZones(zones);
+        setup.toFile();
         this.onCreateProgram(false);
     }
 

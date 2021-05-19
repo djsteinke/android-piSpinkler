@@ -39,7 +39,7 @@ import static com.rn5.pisprinkler.define.Constants.sdfTime;
 public class ProgramFragment extends Fragment {
 
     private int pos;
-    private Context context;
+    private final Context context;
     private FlexboxLayout fb;
     private CreateListener listener;
     private StepAlert stepAlert;
@@ -49,7 +49,9 @@ public class ProgramFragment extends Fragment {
     private TextView next;
     private ImageView active;
 
-    public ProgramFragment() {}
+    public ProgramFragment() {
+        this.context = getActivity().getApplicationContext();
+    }
     public ProgramFragment(Context context) {
         this.context = context;
     }
@@ -64,7 +66,7 @@ public class ProgramFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View vItem = (ViewGroup) inflater.inflate(
+        final View vItem = inflater.inflate(
                 R.layout.fragment_program, container, false);
 
         name = vItem.findViewById(R.id.name);
@@ -123,14 +125,19 @@ public class ProgramFragment extends Fragment {
             if (cl != null) {
                 populateCl(cl, s);
             } else {
-                cl = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.fb_step_v, fb, false);
-                cl.setId(s.getStep());
+                if (context != null) {
+                    LayoutInflater inflater = LayoutInflater.from(context);
+                    if (inflater != null) {
+                        cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_v, fb, false);
+                        cl.setId(s.getStep());
 
-                populateClv(context, cl, s, programs.get(pos).getSteps().size());
+                        populateClv(context, cl, s, programs.get(pos).getSteps().size());
 
-                cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
+                        cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
 
-                fb.addView(cl);
+                        fb.addView(cl);
+                    }
+                }
             }
         }
     }
