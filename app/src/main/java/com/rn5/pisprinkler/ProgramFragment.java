@@ -2,6 +2,7 @@ package com.rn5.pisprinkler;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Layout;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
@@ -39,7 +40,6 @@ import static com.rn5.pisprinkler.define.Constants.sdfTime;
 public class ProgramFragment extends Fragment {
 
     private int pos;
-    private final Context context;
     private FlexboxLayout fb;
     private CreateListener listener;
     private StepAlert stepAlert;
@@ -50,10 +50,6 @@ public class ProgramFragment extends Fragment {
     private ImageView active;
 
     public ProgramFragment() {
-        this.context = getActivity().getApplicationContext();
-    }
-    public ProgramFragment(Context context) {
-        this.context = context;
     }
     public ProgramFragment withPos(int pos) {
         this.pos = pos;
@@ -66,6 +62,7 @@ public class ProgramFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Context context = getActivity();
         final View vItem = inflater.inflate(
                 R.layout.fragment_program, container, false);
 
@@ -81,7 +78,7 @@ public class ProgramFragment extends Fragment {
         ImageButton btEditProg = vItem.findViewById(R.id.ib_edit_program);
         ImageButton btRun = vItem.findViewById(R.id.ib_run_program);
         stepAlert = new StepAlert(context).withListener(this.listener);
-        SlideButton sb = new SlideButton(this.context, btEdit)
+        SlideButton sb = new SlideButton(context, btEdit)
                 .withButton(btAddStep)
                 .withButton(btEditProg)
                 .withButton(btRun);
@@ -103,7 +100,7 @@ public class ProgramFragment extends Fragment {
 
         if (programs.size() > 0) {
             updateProgram();
-            updateSteps();
+            updateSteps(context);
         }
 
         return vItem;
@@ -118,25 +115,23 @@ public class ProgramFragment extends Fragment {
         active.setActivated(programs.get(pos).isActive());
     }
 
-    public void updateSteps() {
+    public void updateSteps(Context context) {
         fb.removeAllViews();
         for (Step s : programs.get(pos).getSteps()) {
             ConstraintLayout cl = fb.findViewById(s.getStep());
             if (cl != null) {
                 populateCl(cl, s);
             } else {
-                if (context != null) {
-                    LayoutInflater inflater = LayoutInflater.from(context);
-                    if (inflater != null) {
-                        cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_v, fb, false);
-                        cl.setId(s.getStep());
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                if (inflater != null) {
+                    cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_v, fb, false);
+                    cl.setId(s.getStep());
 
-                        populateClv(context, cl, s, programs.get(pos).getSteps().size());
+                    populateClv(context, cl, s, programs.get(pos).getSteps().size());
 
-                        cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
+                    cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
 
-                        fb.addView(cl);
-                    }
+                    fb.addView(cl);
                 }
             }
         }

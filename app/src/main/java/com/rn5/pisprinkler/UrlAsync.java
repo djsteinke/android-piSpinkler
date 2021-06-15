@@ -26,7 +26,7 @@ import static com.rn5.pisprinkler.MainActivity.getFTempString;
 
 public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
     private static final String TAG = UrlAsync.class.getSimpleName();
-    private final Settings settings = Settings.load();
+    private final Settings settings = Settings.fromFile();
     String urlString = "http://" + settings.getIp() + ":" + settings.getPort();
     private UrlResponseListener urlResponseListener;
     private RemoteViews remoteView;

@@ -14,6 +14,9 @@ import java.io.IOException;
 
 import lombok.Data;
 
+import static com.rn5.pisprinkler.define.Constants.load;
+import static com.rn5.pisprinkler.define.Constants.save;
+
 @Data
 public class Settings {
     private static final String TAG = Settings.class.getSimpleName();
@@ -32,37 +35,25 @@ public class Settings {
         this.port = port;
     }
 
-    public void save() {
+    public void toFile() {
         Gson gson = new GsonBuilder().create();
         String val = gson.toJson(this);
         try {
-            if (file.exists() || (!file.exists() && file.createNewFile())) {
-                if (file.canWrite() || file.setWritable(true)) {
-                    BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-                    bw.write(val);
-                    bw.close();
-                }
-            }
+            save(file, this);
         } catch (IOException e) {
-            System.out.println("WriteException : " + e.getMessage());
+            Log.e(TAG, "toFile() error: " + e.getMessage());
         }
 
     }
 
-    public static Settings load() {
+    public static Settings fromFile() {
         Log.d(TAG,"load()");
-        String inputLine;
-        StringBuilder sb = new StringBuilder();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            while ((inputLine = br.readLine()) != null) {
-                sb.append(inputLine);
-            }
-            Gson gson = new GsonBuilder().create();
-            return gson.fromJson(sb.toString(), Settings.class);
+            return load(file, Settings.class);
         } catch (IOException e) {
+            Log.d(TAG, "fromFile() file does not exist.  Create new Settings().");
             Settings settings = new Settings(MainActivity.ip, MainActivity.port);
-            settings.save();
+            settings.toFile();
             return settings;
         }
     }

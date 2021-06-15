@@ -74,5 +74,22 @@ public class Program {
             }
         }
     }
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Program))
+            return false;
+        Program other = (Program)o;
+        return this.name.equals(other.name);
+    }
 
 }

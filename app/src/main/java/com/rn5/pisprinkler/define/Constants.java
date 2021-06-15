@@ -1,10 +1,7 @@
 package com.rn5.pisprinkler.define;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.rn5.pisprinkler.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,7 +17,7 @@ import lombok.Data;
 @Data
 public class Constants {
 
-
+    public static final String TAG = Constants.class.getSimpleName();
     public static final SimpleDateFormat sdfTime = new SimpleDateFormat("h:mm aa", Locale.US);
     public static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
     public static final SimpleDateFormat sdfDisplay = new SimpleDateFormat("EEE, MMM d", Locale.US);

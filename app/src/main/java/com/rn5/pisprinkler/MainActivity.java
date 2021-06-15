@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         if (!setFilePath()) {
             Toast.makeText(this, "File Path Creation Failed.", Toast.LENGTH_SHORT).show();
         }
-        settings = Settings.load();
+        settings = Settings.fromFile();
         lastRefresh = Calendar.getInstance().getTimeInMillis();
 
         flexboxLayout = findViewById(R.id.zone_flex_box);
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         getSetup();
 
         pager = findViewById(R.id.pager);
-        pagerAdapter = new ProgramSwipeAdapter(this, this, this, programs.size());
+        pagerAdapter = new ProgramSwipeAdapter(this, programs.size(), this);
         pager.setAdapter(pagerAdapter);
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     private void processSetup() {
         programs = setup.getPrograms();
         zones = setup.getZones();
-        history = setup.getHistories();
+        //history = setup.getHistories();
         loadFlexBox();
         onCreateProgram(false);
     }
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             String port = etPort.getText().toString();
             settings.setIp(ip);
             settings.setPort(Integer.parseInt(port));
-            settings.save();
+            settings.toFile();
             if (listener != null)
                 listener.onUpdateUrl();
         });
@@ -216,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     private boolean setFilePath() {
-        file = this.getFilesDir();
-        boolean result = file != null && (file.exists() || file.mkdir());
+        file = this.getExternalFilesDir("Settings");
+        boolean result = file.exists() || file.mkdir();
         return result && (file.canWrite() || file.setWritable(true, true));
     }
 
@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                     Date delay = sdf.parse(dt);
                     current.getProgram().setDelay(dt);
                     Toast.makeText(this, "Delay expires at " + dt, Toast.LENGTH_SHORT).show();
+                    assert delay != null;
                     setStatus("Delay until " + sdfDisplay.format(delay));
                 } else if (action.equals("cancel")) {
                     Toast.makeText(this, "Delay cancelled.", Toast.LENGTH_SHORT).show();
@@ -329,12 +330,10 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     @Override
     public void onUpdateProgram(int pPos) {
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-        if (allFragments != null) {
-            for (Fragment fragment : allFragments) {
-                ProgramFragment f1 = (ProgramFragment) fragment;
-                if (f1.getPos() == pPos)
-                    f1.updateProgram();
-            }
+        for (Fragment fragment : allFragments) {
+            ProgramFragment f1 = (ProgramFragment) fragment;
+            if (f1.getPos() == pPos)
+                f1.updateProgram();
         }
         saveProgram();
     }
@@ -342,12 +341,10 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     @Override
     public void onUpdateStep(int pPos) {
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-        if (allFragments != null) {
-            for (Fragment fragment : allFragments) {
-                ProgramFragment f1 = (ProgramFragment) fragment;
-                if (f1.getPos() == pPos)
-                    f1.updateSteps();
-            }
+        for (Fragment fragment : allFragments) {
+            ProgramFragment f1 = (ProgramFragment) fragment;
+            if (f1.getPos() == pPos)
+                f1.updateSteps(f1.getContext());
         }
         saveProgram();
     }
@@ -370,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
 
     @Override
     public void onCreateProgram(boolean save) {
-        pagerAdapter = new ProgramSwipeAdapter(this, this, this, programs.size());
+        pagerAdapter = new ProgramSwipeAdapter(this, programs.size(), this);
         pager.setAdapter(pagerAdapter);
         setLl_dots();
         if (save)
@@ -463,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         return typedValue.data;
     }
 
-    private List<Double> getAvg(List<Double> list, double val) {
+    private void getAvg(List<Double> list, double val) {
         if (list.size() > 0)
             list.remove(list.size()-1);
         list.add(0, val);
@@ -475,7 +472,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         }
         list.add(tot/(double)list.size());
 
-        return list;
+        //return list;
     }
 
     private void drawHistory() {
@@ -487,18 +484,26 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         long minMs = getMinMs(historyDays-1);
         double[] mm = getMaxMin();
         double xMs = (double)(iHistW-xOff)/(historyDays*24*3600*1000);
-        double yD = (double)iHistH/(mm[0]-mm[1]);
+        int tL = (mm[0]-mm[1]>50 ? 15 : 10);
+        double yD = (double) iHistH/(5*tL);
+        //double yD = (double)iHistH/(mm[0]-mm[1]);
+        double yDH = (double) iHistH/100d;
 
         Paint pTemp = new Paint();
         pTemp.setStyle(Paint.Style.STROKE);
         pTemp.setColor(getThemeColor(R.attr.colorSecondary));
         pTemp.setStrokeWidth(getPxFromDp(1.5f));
 
-        Paint pH = new Paint();
-        pH.setStyle(Paint.Style.STROKE);
-        pH.setColor(getColor(R.color.gray));
-        pH.setStrokeWidth(1);
-        pH.setTextSize(getPxFromDp(10f));
+        Paint pHumid = new Paint();
+        pHumid.setStyle(Paint.Style.FILL);
+        pHumid.setColor(getThemeColor(R.attr.colorSecondary));
+        pHumid.setAlpha(60);
+
+        Paint pLine = new Paint();
+        pLine.setStyle(Paint.Style.STROKE);
+        pLine.setColor(getColor(R.color.gray));
+        pLine.setStrokeWidth(1);
+        pLine.setTextSize(getPxFromDp(10f));
 
         Paint pTxt = new Paint();
         pTxt.setStyle(Paint.Style.FILL);
@@ -508,42 +513,54 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         pTxt.setTextAlign(Paint.Align.RIGHT);
 
         List<Double> tAvg = new ArrayList<>();
-        int i = (int) mm[0] - 10;
+        List<Double> hAvg = new ArrayList<>();
+        int i = (int) mm[0] - tL;
 
-        while (i > mm[1]) {
+        while (i > mm[0] - 5*tL) {
             double y = (mm[0]-i)*yD;
             Path p = new Path();
             p.moveTo(xOff, (float)y);
             p.lineTo(iHistW, (float)y);
-            canvas.drawPath(p, pH);
+            canvas.drawPath(p, pLine);
             canvas.drawText(formatInt(i)+"\u00B0", xOff-10, (float)y+getPxFromDp(5f), pTxt);
-            i -= 10;
+            i -= tL;
         }
+
         for (int d=0; d<historyDays-1; d++) {
             double x = xOff+(getMinMs(d)-minMs)*xMs;
             Path p = new Path();
             p.moveTo((float)x, 0);
             p.lineTo((float)x, iHistH);
-            canvas.drawPath(p, pH);
+            canvas.drawPath(p, pLine);
         }
 
         Path pT = new Path();
+        Path pH = new Path();
+        pH.moveTo((float) xOff, (float) iHistH);
         boolean move = true;
+        double x = xOff;
         for (History.Temp t : getTempList()) {
             getAvg(tAvg, t.getT());
+            getAvg(hAvg, t.getH());
             double tmp = tAvg.get(tAvg.size()-1);
-            double x = xOff+(t.getTime().getTime()-minMs)*xMs;
+            double hum = hAvg.get(hAvg.size()-1);
+            x = xOff+(t.getTime().getTime()-minMs)*xMs;
             double fTmp = getTempF(tmp);
             double y = (mm[0]-fTmp)*yD;
+            double yH = (100-hum)*yDH;
             if (x >= xOff) {
                 if (move)
                     pT.moveTo((float) x, (float) y);
                 else
                     pT.lineTo((float) x, (float) y);
+                pH.lineTo((float) x, (float) yH);
                 move = false;
             }
         }
+        pH.lineTo((float) x, (float) iHistH);
+        pH.close();
 
+        canvas.drawPath(pH, pHumid);
         canvas.drawPath(pT, pTemp);
         iv_history.setImageBitmap(bitmap);
     }
@@ -561,8 +578,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 history.add(newH);
         }
         Log.d(TAG, "loadHistory() " + history);
-        setup.setHistories(history);
-        setup.toFile();
+        //setup.setHistories(history);
+        //setup.toFile();
         drawHistory();
         lastRefresh = Calendar.getInstance().getTimeInMillis();
     }
@@ -590,7 +607,8 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 if (p.getName().equals(current.getProgram().getName()))
                     step_cnt = p.getSteps().size();
             }
-            cur = current.getProgram().getName() + " running Step " + current.getProgram().getStep() + " of " + step_cnt + " - " +
+            int step_no = current.getProgram().getStep()+1;
+            cur = current.getProgram().getName() + " running Step " + step_no + " of " + step_cnt + " - " +
                     current.getProgram().getTime() + " of " + current.getProgram().getRunTime()/60 + " min";
             setStatus(cur);
         } else if (!TextUtils.isEmpty(current.getProgram().getDelay())) {
@@ -599,6 +617,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 Date delay = sdf.parse(dt);
                 current.getProgram().setDelay(dt);
                 Toast.makeText(this, "Delay expires at " + dt, Toast.LENGTH_SHORT).show();
+                assert delay != null;
                 setStatus("Delay until " + sdfDisplay.format(delay));
             } catch (ParseException e) {
                 Log.e(TAG, "loadTemp() error Delay date parse failed. " + e.getMessage());
@@ -635,10 +654,14 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
                 zones.add(newZ);
         }
         for (int i=0; i < jPrograms.length(); i++) {
-            JSONObject p = (JSONObject) jPrograms.get(i);
-            Program newP = gson.fromJson(p.toString(), Program.class);
+            JSONObject obj = (JSONObject) jPrograms.get(i);
+            Program newP = gson.fromJson(obj.toString(), Program.class);
             if (!programs.contains(newP))
                 programs.add(newP);
+            else {
+                int i2 = programs.indexOf(newP);
+                programs.set(i2, newP);
+            }
         }
         loadFlexBox();
         setup.setPrograms(programs);
