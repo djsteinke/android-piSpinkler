@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.rn5.pisprinkler">
+    package="rnfive.htfu.pisprinkler">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.wireguard.android.permission.CONTROL_TUNNELS"/>
@@ -12,19 +12,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.PiSprinkler">
-        <activity android:name=".MainActivity">
+        android:theme="@style/Theme.PiSprinkler"
+        android:name=".App">
+        <activity android:name="rnfive.htfu.pisprinkler.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ProgramActivity"/>
-        <activity android:name=".ZoneActivity"/>
-        <receiver android:name=".MainWidget" >
+        <activity android:name="rnfive.htfu.pisprinkler.ProgramActivity"/>
+        <activity android:name="rnfive.htfu.pisprinkler.ZoneActivity"/>
+        <receiver android:name="rnfive.htfu.pisprinkler.widget.MainWidget"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.rn5.extra.APP_WIDGET_ID" />
+                <action android:name="rnfive.htfu.extra.APP_WIDGET_ID" />
             </intent-filter>
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/appwidget_provider" />
