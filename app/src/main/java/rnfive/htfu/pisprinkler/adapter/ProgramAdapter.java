@@ -16,7 +16,7 @@ import rnfive.htfu.pisprinkler.define.Program;
 import rnfive.htfu.pisprinkler.define.ProgramAlert;
 import rnfive.htfu.pisprinkler.define.Step;
 
-import static rnfive.htfu.pisprinkler.MainActivity.programs;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.programs;
 import static rnfive.htfu.pisprinkler.define.Constants.formatInt;
 import static rnfive.htfu.pisprinkler.define.Constants.sdfDisplay;
 import static rnfive.htfu.pisprinkler.define.Constants.sdfTime;

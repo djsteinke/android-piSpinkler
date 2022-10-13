@@ -1,5 +1,6 @@
 package rnfive.htfu.pisprinkler.define;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,7 @@ public class History {
     private Double hAvg;
     private Double tMax;
     private Double tMin;
-    private List<Temp> history;
+    private List<Temp> history = new ArrayList<>();
 
     public History() {}
 

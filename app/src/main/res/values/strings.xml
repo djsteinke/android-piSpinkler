@@ -3,6 +3,9 @@
     <string name="main_menu">Main Menu</string>
     <string name="summary">Summary</string>
     <string name="programs">Programs</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
     <string name="zones">Zones</string>
     <string name="pin">Pin</string>
     <string name="type">Type</string>

@@ -8,7 +8,6 @@ import android.view.MenuItem;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
-import rnfive.htfu.pisprinkler.R;
 
 import rnfive.htfu.pisprinkler.adapter.ZoneAdapter;
 import rnfive.htfu.pisprinkler.define.ZoneAlert;
@@ -19,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static rnfive.htfu.pisprinkler.MenuUtil.menuItemSelector;
-import static rnfive.htfu.pisprinkler.MainActivity.zones;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.zones;
 
 public class ZoneActivity extends AppCompatActivity {
     private static final String TAG = ZoneActivity.class.getSimpleName();

@@ -3,7 +3,7 @@ package rnfive.htfu.pisprinkler.define;
 import android.util.Log;
 
 import com.google.gson.*;
-import rnfive.htfu.pisprinkler.MainActivity;
+import rnfive.htfu.pisprinkler.MainActivityPiSprinkler;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,9 @@ public class Settings {
     private int port;
     private String ip;
     private static final String fileName = "settings.json";
-    private static final File file = new File(MainActivity.file, fileName);
+    private String username;
+    private String password;
+    private static final File file = new File(MainActivityPiSprinkler.file, fileName);
 
     Settings(){
         Log.d(TAG,"Settings()");
@@ -48,7 +50,7 @@ public class Settings {
             return load(file, Settings.class);
         } catch (IOException e) {
             Log.d(TAG, "fromFile() file does not exist.  Create new Settings().");
-            Settings settings = new Settings(MainActivity.ip, MainActivity.port);
+            Settings settings = new Settings(MainActivityPiSprinkler.ip, MainActivityPiSprinkler.port);
             settings.toFile();
             return settings;
         }

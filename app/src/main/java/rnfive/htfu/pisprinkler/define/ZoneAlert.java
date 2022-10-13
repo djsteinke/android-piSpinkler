@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 import androidx.appcompat.app.AlertDialog;
-import rnfive.htfu.pisprinkler.MainActivity;
+import rnfive.htfu.pisprinkler.MainActivityPiSprinkler;
 
 public class ZoneAlert {
     private static final String TAG = ZoneAlert.class.getSimpleName();
@@ -37,9 +37,9 @@ public class ZoneAlert {
         title.setText(strZone);
         builder.setView(v);
         builder.setPositiveButton("OK",(dialog,which)-> {
-            MainActivity.zones.remove(pos);
+            MainActivityPiSprinkler.zones.remove(pos);
             int i = 0;
-            for (Zone z : MainActivity.zones) {
+            for (Zone z : MainActivityPiSprinkler.zones) {
                 z.setZone(i);
                 i++;
             }
@@ -78,21 +78,21 @@ public class ZoneAlert {
         ArrayAdapter<Integer> aPin = new ArrayAdapter<>(context, R.layout.spinner_item, pins);
         aPin.setDropDownViewResource(R.layout.spinner_dropdown_item);
         sPin.setAdapter(aPin);
-        if (pos < MainActivity.zones.size()) {
-            sType.setSelection(MainActivity.zones.get(pos).getType());
-            sPin.setSelection(getPinPos(MainActivity.zones.get(pos).getPin()));
+        if (pos < MainActivityPiSprinkler.zones.size()) {
+            sType.setSelection(MainActivityPiSprinkler.zones.get(pos).getType());
+            sPin.setSelection(getPinPos(MainActivityPiSprinkler.zones.get(pos).getPin()));
         }
         builder.setView(v);
         builder.setPositiveButton("OK",(dialog,which)-> {
             Integer iPin = (Integer) sPin.getSelectedItem();
             int iType = HeadType.getIntFromString((String) sType.getSelectedItem());
-            if (pos < MainActivity.zones.size()) {
-                MainActivity.zones.get(pos).setPin(iPin);
-                MainActivity.zones.get(pos).setType(iType);
+            if (pos < MainActivityPiSprinkler.zones.size()) {
+                MainActivityPiSprinkler.zones.get(pos).setPin(iPin);
+                MainActivityPiSprinkler.zones.get(pos).setType(iType);
             } else {
                 Zone zone = new Zone().withZone(pos)
                         .withType(iType).withPin(iPin);
-                MainActivity.zones.add(zone);
+                MainActivityPiSprinkler.zones.add(zone);
             }
             if (adapter != null)
                 adapter.notifyDataSetChanged();

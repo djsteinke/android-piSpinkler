@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import rnfive.htfu.pisprinkler.R;
-
 import rnfive.htfu.pisprinkler.define.Settings;
 import rnfive.htfu.pisprinkler.listener.UrlResponseListener;
 
@@ -102,9 +100,9 @@ public class UrlAsync extends AsyncTask<String,Void,JSONObject> {
                 try {
                     if (val.getString("type").equals("temp")) {
                         JSONObject response = val.getJSONObject("response");
-                        String txt = MainActivity.getFTempString(response.getDouble("temp")) + "\n";
+                        String txt = MainActivityPiSprinkler.getFTempString(response.getDouble("temp")) + "\n";
                         txt += df0.format(response.getDouble("humidity")) + "%";
-                        remoteView.setTextViewText(R.id.widget_temp, txt);
+                        remoteView.setTextViewText(R.id.widget_text, txt);
                         appWidgetManager.updateAppWidget(appWidgetId, remoteView);
                         Log.d(TAG, txt);
                     }

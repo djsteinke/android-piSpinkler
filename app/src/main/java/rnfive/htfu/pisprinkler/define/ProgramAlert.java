@@ -33,8 +33,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import lombok.Data;
 
-import static rnfive.htfu.pisprinkler.MainActivity.programs;
-import static rnfive.htfu.pisprinkler.MainActivity.zones;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.programs;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.zones;
 
 @Data
 public class ProgramAlert  {

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "431453272167",
+    "firebase_url": "https://rn5notifications-default-rtdb.firebaseio.com",
     "project_id": "rn5notifications",
     "storage_bucket": "rn5notifications.appspot.com"
   },
@@ -9,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:431453272167:android:4f36537c4a490f06693cc2",
         "android_client_info": {
-          "package_name": "rnfive.htfu.pisprinkler"
+          "package_name": "com.rn5.garagedooropener"
         }
       },
       "oauth_client": [
@@ -17,10 +18,68 @@
           "client_id": "431453272167-t8ck19oiv38gojhj84snum74f783ko39.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "rnfive.htfu.pisprinkler",
+            "package_name": "com.rn5.garagedooropener",
             "certificate_hash": "9f2f60acd37feb30200e6ab5353e831f81a5600e"
           }
         },
+        {
+          "client_id": "431453272167-4fn0pmbu6tiffrdsq11cr88uepji3oad.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSrF_J9Go7Oty3RlePpjAV9SZ3aZIZM6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431453272167-4fn0pmbu6tiffrdsq11cr88uepji3oad.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431453272167:android:8b29acaa823d4fc5693cc2",
+        "android_client_info": {
+          "package_name": "rnfive.htfu.pisprinkler"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "431453272167-4fn0pmbu6tiffrdsq11cr88uepji3oad.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSrF_J9Go7Oty3RlePpjAV9SZ3aZIZM6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431453272167-4fn0pmbu6tiffrdsq11cr88uepji3oad.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431453272167:android:287b21fc3225c70d693cc2",
+        "android_client_info": {
+          "package_name": "rnfive.htfu.temperatureregulator"
+        }
+      },
+      "oauth_client": [
         {
           "client_id": "431453272167-4fn0pmbu6tiffrdsq11cr88uepji3oad.apps.googleusercontent.com",
           "client_type": 3

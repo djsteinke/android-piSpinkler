@@ -20,8 +20,8 @@ import java.util.Locale;
 import androidx.appcompat.app.AlertDialog;
 import lombok.Data;
 
-import static rnfive.htfu.pisprinkler.MainActivity.programs;
-import static rnfive.htfu.pisprinkler.MainActivity.zones;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.programs;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.zones;
 import static rnfive.htfu.pisprinkler.define.Constants.formatInt;
 
 @Data

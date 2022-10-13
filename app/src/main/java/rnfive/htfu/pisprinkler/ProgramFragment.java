@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.flexbox.FlexboxLayout;
-import rnfive.htfu.pisprinkler.R;
 
 import rnfive.htfu.pisprinkler.define.ProgramAlert;
 import rnfive.htfu.pisprinkler.define.SlideButton;
@@ -27,8 +26,8 @@ import androidx.fragment.app.Fragment;
 import lombok.Getter;
 import lombok.Setter;
 
-import static rnfive.htfu.pisprinkler.MainActivity.programs;
-import static rnfive.htfu.pisprinkler.MainActivity.zones;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.programs;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.zones;
 import static rnfive.htfu.pisprinkler.define.Constants.formatInt;
 import static rnfive.htfu.pisprinkler.define.Constants.sdfDisplay;
 import static rnfive.htfu.pisprinkler.define.Constants.sdfTime;

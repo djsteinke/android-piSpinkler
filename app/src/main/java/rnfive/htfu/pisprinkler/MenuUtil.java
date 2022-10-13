@@ -3,8 +3,6 @@ package rnfive.htfu.pisprinkler;
 import android.content.Intent;
 import android.view.MenuItem;
 
-import rnfive.htfu.pisprinkler.R;
-
 import rnfive.htfu.pisprinkler.listener.CreateListener;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +22,10 @@ public abstract class MenuUtil extends AppCompatActivity {
                 context.startActivity(new Intent(context, ZoneActivity.class));
                 break;
             case R.id.url_item:
-                MainActivity.alert(context, listener);
+                MainActivityPiSprinkler.alert(context, listener);
+                break;
+            case R.id.login_item:
+                MainActivityPiSprinkler.loginAlert(context);
                 break;
             default:
                 return true;

@@ -8,22 +8,7 @@
 
     <TextView
         android:background="@drawable/rectangle_rounded_corner"
-        android:id="@+id/widget_temp"
-        android:gravity="center"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/app_name"
-        android:scaleType="center"
-        android:textSize="@dimen/widget_text"
-        android:textColor="@color/white"
-        android:layout_gravity="center">
-    </TextView>
-    <TextView
-        android:background="@drawable/rectangle_rounded_corner"
-        android:id="@+id/widget_hunidity"
+        android:id="@+id/widget_text"
         android:gravity="center"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"

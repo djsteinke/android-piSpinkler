@@ -2,6 +2,7 @@ package rnfive.htfu.pisprinkler;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -9,10 +10,12 @@ import androidx.viewpager2.widget.ViewPager2;
 import rnfive.htfu.pisprinkler.define.Constants;
 import rnfive.htfu.pisprinkler.define.Current;
 import rnfive.htfu.pisprinkler.define.History;
+import rnfive.htfu.pisprinkler.define.HistoryFB;
 import rnfive.htfu.pisprinkler.define.Program;
 import rnfive.htfu.pisprinkler.define.ProgramAlert;
 import rnfive.htfu.pisprinkler.define.Settings;
 import rnfive.htfu.pisprinkler.define.Setup;
+import rnfive.htfu.pisprinkler.define.SetupFB;
 import rnfive.htfu.pisprinkler.define.Zone;
 import rnfive.htfu.pisprinkler.listener.CreateListener;
 import rnfive.htfu.pisprinkler.listener.UrlResponseListener;
@@ -45,9 +48,17 @@ import android.widget.Toast;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import rnfive.htfu.pisprinkler.R;
+import com.google.gson.reflect.TypeToken;
 
 import rnfive.htfu.pisprinkler.adapter.ProgramSwipeAdapter;
 import rnfive.htfu.pisprinkler.define.StatusAlert;
@@ -58,19 +69,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static rnfive.htfu.pisprinkler.MenuUtil.menuItemSelector;
 
-public class MainActivity extends AppCompatActivity implements UrlResponseListener, CreateListener {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class MainActivityPiSprinkler extends AppCompatActivity implements UrlResponseListener, CreateListener {
+    private static final String TAG = MainActivityPiSprinkler.class.getSimpleName();
 
     private TextView ipText;
     private TextView mainText;
@@ -87,15 +102,29 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     public static File file;
     private static Settings settings;
     private static Setup setup;
-    private long lastRefresh = 0;
+    private static long lastRefresh = 0;
 
     public static List<Program> programs = new ArrayList<>();
     public static List<Zone> zones = new ArrayList<>();
     public static List<History> history = new ArrayList<>();
+    public static List<History> fbHistory = new ArrayList<>();
     public static Current current;
+
+    private static SetupFB setupFB;
+    private static final List<HistoryFB> historyFB = new ArrayList<>();
+    private static ValueEventListener historyListener;
 
     private ViewPager2 pager;
     private FragmentStateAdapter pagerAdapter;
+
+    private static DatabaseReference databaseReference;
+    private static FirebaseAuth mAuth;
+    private static final GsonBuilder gsonBuilder = new GsonBuilder();
+    private static final Gson gson;
+    static {
+        gsonBuilder.setDateFormat("yyyy-MM-dd HH:mm:ss");
+        gson = gsonBuilder.create();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +178,9 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         setup = Setup.fromFile();
         if (setup.getId() != null)
             processSetup();
+
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
     }
 
     public void click() {
@@ -218,6 +250,157 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         builder.show();
     }
 
+    public static void loginAlert(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(context).inflate(R.layout.popup_login, null);
+        EditText etEmail = cl.findViewById(R.id.et_email);
+        EditText etPassword = cl.findViewById(R.id.et_password);
+        if (settings.getUsername() != null)
+            etEmail.setText(settings.getUsername());
+        if (settings.getPassword() != null)
+            etPassword.setText(settings.getPassword());
+
+        builder.setView(cl);
+
+        builder.setPositiveButton(R.string.login, (dialogInterface, i) -> {
+            String email = etEmail.getText().toString();
+            String password = etPassword.getText().toString();
+
+            signIn(email, password);
+        });
+
+        builder.setNegativeButton("Cancel", (dialogInterface, i) -> {
+        });
+
+        builder.show();
+    }
+
+    private static void signIn(String email, String password) {
+        Log.d(TAG, "signIn:" + email);
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success");
+                        // FirebaseUser user = mAuth.getCurrentUser();
+                        settings.setUsername(email);
+                        settings.setPassword(password);
+                        settings.toFile();
+                        registerFirebaseListeners("onStart");
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                    }
+                });
+    }
+
+    private static void registerFirebaseListeners(String flag) {
+        if (mAuth.getCurrentUser() != null) {
+            if (flag.equals("onStart")) {
+                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                databaseReference = firebaseDatabase.getReference("sprinkler");
+                databaseReference.child("setupFB")
+                        .addValueEventListener(getFirebaseValueEventListener("setupFB"));
+                historyListener = getFirebaseValueEventListener("history");
+            }
+            if (flag.equals("onStart") || flag.equals("onResume"))
+                databaseReference.child("history").orderByKey().limitToLast(4)
+                        .addValueEventListener(historyListener);
+            if (flag.equals("onPause")) {
+                databaseReference.child("history").removeEventListener(historyListener);
+            }
+        }
+    }
+
+    private static ValueEventListener getFirebaseValueEventListener(String child) {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                switch (child) {
+                    case "setupFB":
+                        setupFB = snapshot.getValue(SetupFB.class);
+                        Log.d(TAG, "SetupFB : " + setupFB);
+                        break;
+                    case "history":
+                        for (DataSnapshot child : snapshot.getChildren()) {
+                            HistoryFB newHistory = child.getValue(HistoryFB.class);
+                            historyFB.add(newHistory);
+                        }
+                        Collections.sort(historyFB);
+                        lastRefresh = Calendar.getInstance().getTimeInMillis();
+                        Log.d(TAG, "HistoryFB: " + historyFB);
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        };
+    }
+
+    private static void getFirebaseHistory() {
+        databaseReference.child("history").orderByKey().limitToLast(historyDays).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d(TAG, snapshot.toString());
+                SimpleDateFormat sdf = new SimpleDateFormat(History.dateFormat, Locale.US);
+                Gson gson = new GsonBuilder().setDateFormat(History.Temp.dateFormat).create();
+                for (DataSnapshot snapDay : snapshot.getChildren()) {
+                    History hist = new History();
+                    for (DataSnapshot snapDetails : snapDay.getChildren()) {
+                        if (snapDetails.getKey() != null) {
+                            switch (snapDetails.getKey()) {
+                                case "dt":
+                                    String dt = snapDetails.getValue(String.class);
+                                    try {
+                                        assert dt != null;
+                                        hist.setDt(sdf.parse(dt));
+                                    } catch (ParseException e) {
+                                        Log.e(TAG, "Invalid Date Format. " + e.getMessage());
+                                    }
+                                    break;
+                                case "tAvg":
+                                    hist.setTAvg(snapDetails.getValue(Double.class));
+                                    break;
+                                case "hAvg":
+                                    hist.setHAvg(snapDetails.getValue(Double.class));
+                                    break;
+                                case "tMax":
+                                    hist.setTMax(snapDetails.getValue(Double.class));
+                                    break;
+                                case "tMin":
+                                    hist.setTMin(snapDetails.getValue(Double.class));
+                                    break;
+                                case "history":
+                                    for (DataSnapshot snapEntry : snapDetails.getChildren()) {
+                                        Object entryObject = snapEntry.getValue(Object.class);
+                                        String json = gson.toJson(entryObject);
+                                        History.Temp tempEntry = gson.fromJson(json, History.Temp.class);
+                                        hist.getHistory().add(tempEntry);
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    fbHistory.add(0, hist);
+                }
+                Log.d(TAG, "onDataChange: history: " + fbHistory);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private boolean setFilePath() {
         file = this.getExternalFilesDir("Settings");
         boolean result = file.exists() || file.mkdir();
@@ -241,13 +424,73 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     }
 
     private void saveProgram() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.setDateFormat("yyyy-MM-dd hh:mm:ss");
-        Gson gson = gsonBuilder.create();
-        UrlAsync async = new UrlAsync();
-        async.execute("POST","update/programs", gson.toJson(programs));
+        // UrlAsync async = new UrlAsync();
+        // async.execute("POST","update/programs", gson.toJson(programs));
         setup.setPrograms(programs);
         setup.toFile();
+
+        saveProgramFDB();
+    }
+
+    private void saveProgramFDB() {
+        Log.d(TAG, "saveProgramFDB()");
+
+        try {
+            String pString = gson.toJson(setup.getPrograms());
+            ArrayList map = gson.fromJson(pString, ArrayList.class);
+            Log.d(TAG, map.toString());
+            databaseReference.child("programs").setValue(map);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    private void loadSetupFDB() {
+        Log.d(TAG, "loadProgramsFDB()");
+        databaseReference.child("setup").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                HashMap object = (HashMap) snapshot.getValue();
+
+                Type gsonType = new TypeToken<HashMap>(){}.getType();
+                String gsonString = gson.toJson(object,gsonType);
+                //Log.i(TAG, gsonString);
+                Setup setup = gson.fromJson(gsonString, Setup.class);
+                //processSetup();
+                Log.i(TAG, setup.toString());
+
+                HashMap map = gson.fromJson(gsonString, HashMap.class);
+                Log.d(TAG, "loadProgramsFDB() " + map.toString());
+                /*
+                try {
+                    JSONArray progsJSON = new JSONArray(gsonString);
+                    for (int i = 0; i < progsJSON.length(); i++) {
+                        Program p = gson.fromJson(progsJSON.getJSONObject(i).toString(), Program.class);
+                        Log.d(TAG, p.getName());
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+
+                 */
+
+                /*
+                assert object != null;
+                for (Map.Entry<String, Object> entry : object.entrySet()) {
+                    //Program newP = gson.fromJson(gsonString, Program.class);
+                    Log.d(TAG, newP.toString());
+                }
+
+                 */
+
+                //Map<String, Object> map = (Map<String, Object>) object;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivityPiSprinkler.this, "Fail to get data.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void loadDelay(JSONObject object) {
@@ -361,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     @Override
     public void onCreateZone() {
         loadFlexBox();
-        Gson gson = new Gson();
+        // TODO
         UrlAsync async = new UrlAsync();
         async.execute("POST","update/zones", gson.toJson(zones));
         setup.setZones(zones);
@@ -462,17 +705,6 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
             ret.put(h.getDt(), h.getTAvg());
         }
         return ret;
-    }
-    private Double getTempAvg(Date dt, Map<Date,Double> map) {
-        String date = Constants.sdfDate.format(dt);
-
-        try {
-            Date dateNT = Constants.sdfDate.parse(date);
-            return map.get(dateNT);
-        } catch (ParseException e) {
-            Log.e(TAG, "getTempAvg() Error: " + e.getMessage());
-            return 0.0d;
-        }
     }
 
     private List<History.Temp> getTempList() {
@@ -575,7 +807,6 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         List<Double> avg = new ArrayList<>();
         List<History.Temp> tempList = getTempList();
         int avgSize = tempList.size()/(historyDays/2);
-        Map<Date, Double> tempAvgMap = getTempAvgList();
 
         while (i > mm[0] - 5*tL) {
             double y = (mm[0]-i)*yD;
@@ -645,9 +876,11 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     private void loadHistory(JSONObject val) throws JSONException {
 
         JSONArray jHistory = val.getJSONArray("history");
+        /*
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setDateFormat(History.Temp.dateFormat);
         Gson gson = gsonBuilder.create();
+         */
         for (int i=0; i < jHistory.length(); i++) {
             JSONObject z = (JSONObject) jHistory.get(i);
             History newH = gson.fromJson(z.toString(), History.class);
@@ -664,9 +897,11 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     private void loadTemp(JSONObject val) throws JSONException {
         DecimalFormat df0 = new DecimalFormat("#");
 
+        /*
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setDateFormat(History.Temp.dateFormat);
         Gson gson = gsonBuilder.create();
+         */
         current = gson.fromJson(val.toString(), Current.class);
         Log.d(TAG,"loadTemp() " + current.toString());
 
@@ -721,9 +956,11 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         JSONObject in = val.getJSONObject("setup");
         JSONArray jPrograms = in.getJSONArray("programs");
         JSONArray jZones = in.getJSONArray("zones");
+        /*
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.setDateFormat("yyyy-MM-dd hh:mm:ss");
         Gson gson = gsonBuilder.create();
+         */
         setup = gson.fromJson(in.toString(), Setup.class);
         for (int i=0; i < jZones.length(); i++) {
             JSONObject z = (JSONObject) jZones.get(i);
@@ -745,17 +982,19 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
         setup.setPrograms(programs);
         setup.setZones(zones);
         setup.toFile();
-        Log.d(TAG, "loadSetup() JSON: " + val.toString());
+        Log.d(TAG, "loadSetup() JSON: " + val);
         Log.d(TAG, "loadSetup() Setup: " + setup.toString());
         this.onCreateProgram(false);
     }
 
     private void getSetup() {
+        // TODO
         UrlAsync async = new UrlAsync().withListener(this);
         async.execute("GET","getSetup");
     }
 
     private void getHistory() {
+        // TODO
         UrlAsync async = new UrlAsync().withListener(this);
         async.execute("GET","getTemp/" + historyDays);
     }
@@ -819,18 +1058,29 @@ public class MainActivity extends AppCompatActivity implements UrlResponseListen
     @Override
     public void onStart() {
         super.onStart();
-        click();
+        //click();
+        if (mAuth.getCurrentUser() != null) {
+            registerFirebaseListeners("onStart");
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (lastRefresh < (Calendar.getInstance().getTimeInMillis()-(15f*60*1000)))
-            getHistory();
+        // if (lastRefresh < (Calendar.getInstance().getTimeInMillis()-(15f*60*1000)))
+        //    getHistory();
+
+        if (mAuth.getCurrentUser() != null) {
+            if (lastRefresh < (Calendar.getInstance().getTimeInMillis()-(15f*60*1000)))
+                registerFirebaseListeners("onResume");
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        if (mAuth.getCurrentUser() != null) {
+            registerFirebaseListeners("onPause");
+        }
     }
 }

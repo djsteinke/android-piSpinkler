@@ -8,7 +8,6 @@ import android.view.MenuItem;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
-import rnfive.htfu.pisprinkler.R;
 
 import rnfive.htfu.pisprinkler.adapter.ProgramAdapter;
 import com.google.gson.GsonBuilder;
@@ -18,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import static rnfive.htfu.pisprinkler.MainActivity.programs;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.programs;
 import static rnfive.htfu.pisprinkler.MenuUtil.menuItemSelector;
 
 public class ProgramActivity extends AppCompatActivity {

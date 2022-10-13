@@ -15,7 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import static rnfive.htfu.pisprinkler.MainActivity.file;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.file;
 import static rnfive.htfu.pisprinkler.define.Constants.load;
 import static rnfive.htfu.pisprinkler.define.Constants.save;
 
@@ -34,7 +34,6 @@ public class Setup {
     private Date delay = new Date();
     private List<Program> programs = new ArrayList<>();
     private List<Zone> zones = new ArrayList<>();
-    //private List<History> histories = new ArrayList<>();
 
     public Setup() {}
 
@@ -53,7 +52,9 @@ public class Setup {
 
     public void toFile() {
         try {
-            this.id = Calendar.getInstance().getTimeInMillis();
+            if (this.id == null) {
+                this.id = Calendar.getInstance().getTimeInMillis();
+            }
             save(new File(file, fileName), this);
         } catch (IOException e) {
             Log.e(TAG, "toFile() failed. " + e.getMessage());

@@ -14,7 +14,7 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.PiSprinkler"
         android:name=".App">
-        <activity android:name="rnfive.htfu.pisprinkler.MainActivity"
+        <activity android:name="rnfive.htfu.pisprinkler.MainActivityPiSprinkler"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
