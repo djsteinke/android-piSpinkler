@@ -63,6 +63,10 @@ public class HistoryFB implements Comparable<HistoryFB>{
 
         public Temp() {}
 
+        public Date getTimeDate() {
+            return new Date(this.time);
+        }
+
         public void setTime(String stringDate) {
             try {
                 Date dt = new SimpleDateFormat(dateFormat, Locale.US).parse(stringDate);

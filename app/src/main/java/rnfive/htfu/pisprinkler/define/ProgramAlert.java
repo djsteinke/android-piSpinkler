@@ -94,7 +94,7 @@ public class ProgramAlert  {
         return builder;
     }
 
-    public static void getProgramAlert(ProgramAlert alert, final int pos) {
+    public static void getProgramAlert(ProgramAlert alert, final int pos, final String programName) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(alert.getContext());
         View v = LayoutInflater.from(alert.getContext()).inflate(R.layout.popup_program, null);

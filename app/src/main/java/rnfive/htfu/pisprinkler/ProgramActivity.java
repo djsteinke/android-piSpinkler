@@ -46,7 +46,7 @@ public class ProgramActivity extends AppCompatActivity {
             //ProgramAlert.getProgramAlert(this, adapter, programs.size()).show();
             ProgramAlert alert = new ProgramAlert().withAdapter(adapter)
                     .withContext(this);
-            ProgramAlert.getProgramAlert(alert, programs.size());
+            ProgramAlert.getProgramAlert(alert, programs.size(), null);
         });
     }
 

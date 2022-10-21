@@ -49,7 +49,6 @@ import android.widget.Toast;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -94,8 +93,8 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
     private ImageView iv_history;
 
     private static final int historyDays = 4;
-    private int iHistW = 0;
-    private int iHistH = 0;
+    private static int iHistW = 0;
+    private static int iHistH = 0;
     private int currProgram = 0;
     public static int port = 1984;
     public static String ip = "192.168.0.152";
@@ -110,7 +109,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
     public static List<History> fbHistory = new ArrayList<>();
     public static Current current;
 
-    private static SetupFB setupFB;
+    public static SetupFB setupFB;
     private static final List<HistoryFB> historyFB = new ArrayList<>();
     private static ValueEventListener historyListener;
 
@@ -154,17 +153,17 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
                 iv_history.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 iHistW  = iv_history.getMeasuredWidth();
                 iHistH = iv_history.getMeasuredHeight();
-                getHistory();
+                //getHistory();
                 //drawHistory();
             }
         });
 
         button.setOnClickListener(view -> click());
 
-        getSetup();
+        //getSetup();
 
         pager = findViewById(R.id.pager);
-        pagerAdapter = new ProgramSwipeAdapter(this, programs.size(), this);
+        pagerAdapter = new ProgramSwipeAdapter(this, this);
         pager.setAdapter(pagerAdapter);
         pager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -176,8 +175,8 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         });
 
         setup = Setup.fromFile();
-        if (setup.getId() != null)
-            processSetup();
+        //if (setup.getId() != null)
+        //    processSetup();
 
         mAuth = FirebaseAuth.getInstance();
         FirebaseMessaging.getInstance().setAutoInitEnabled(true);
@@ -195,6 +194,37 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         //history = setup.getHistories();
         loadFlexBox();
         onCreateProgram(false);
+    }
+
+    private void processSetupFB() {
+        loadFlexBoxFB();
+        onCreateProgram(false);
+    }
+
+    private void loadFlexBoxFB() {
+        flexboxLayout.removeAllViews();
+        for (Zone z : setupFB.getZones()) {
+            View v = getLayoutInflater().inflate(R.layout.fb_text_view,flexboxLayout, false);
+            TextView tv = v.findViewById(R.id.fb_text);
+            String zoneId = Constants.formatInt(z.getZone()+1);
+            int typeDr = R.drawable.head_fixed;
+            switch (z.getType()) {
+                case 1:
+                    typeDr = R.drawable.head_rotary;
+                    break;
+                case 2:
+                    typeDr = R.drawable.head_rotor;
+                    break;
+                default:
+                    break;
+            }
+            v.setBackground(ContextCompat.getDrawable(this, typeDr));
+            tv.setText(zoneId);
+            tv.setOnClickListener(view -> ZoneAlert.getZoneAlert(this, null, this, z.getZone()));
+            tv.setOnLongClickListener(view -> {ZoneAlert.getDeleteZoneAlert(this, null, this, z.getZone());
+                return true;});
+            flexboxLayout.addView(v);
+        }
     }
 
     private void loadFlexBox() {
@@ -267,7 +297,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
             String email = etEmail.getText().toString();
             String password = etPassword.getText().toString();
 
-            signIn(email, password);
+            signIn(email, password, (CreateListener) context);
         });
 
         builder.setNegativeButton("Cancel", (dialogInterface, i) -> {
@@ -276,7 +306,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         builder.show();
     }
 
-    private static void signIn(String email, String password) {
+    private static void signIn(String email, String password, CreateListener listener) {
         Log.d(TAG, "signIn:" + email);
 
         mAuth.signInWithEmailAndPassword(email, password)
@@ -288,7 +318,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
                         settings.setUsername(email);
                         settings.setPassword(password);
                         settings.toFile();
-                        registerFirebaseListeners("onStart");
+                        registerFirebaseListeners("onStart", listener);
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -296,31 +326,39 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
                 });
     }
 
-    private static void registerFirebaseListeners(String flag) {
+    private static boolean historyRegistered = false;
+    private static void registerFirebaseListeners(String flag, CreateListener listener) {
         if (mAuth.getCurrentUser() != null) {
             if (flag.equals("onStart")) {
                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                 databaseReference = firebaseDatabase.getReference("sprinkler");
                 databaseReference.child("setupFB")
-                        .addValueEventListener(getFirebaseValueEventListener("setupFB"));
-                historyListener = getFirebaseValueEventListener("history");
+                        .addValueEventListener(getFirebaseValueEventListener("setupFB", listener));
+                historyListener = getFirebaseValueEventListener("history", listener);
             }
-            if (flag.equals("onStart") || flag.equals("onResume"))
-                databaseReference.child("history").orderByKey().limitToLast(4)
-                        .addValueEventListener(historyListener);
+            if (flag.equals("onStart") || flag.equals("onResume")) {
+                if (!historyRegistered)
+                    databaseReference.child("history").orderByKey().limitToLast(4)
+                            .addValueEventListener(historyListener);
+                historyRegistered = true;
+            }
             if (flag.equals("onPause")) {
-                databaseReference.child("history").removeEventListener(historyListener);
+                if (historyRegistered)
+                    databaseReference.child("history").removeEventListener(historyListener);
+                historyRegistered = false;
             }
         }
     }
 
-    private static ValueEventListener getFirebaseValueEventListener(String child) {
+    private static ValueEventListener getFirebaseValueEventListener(String child, CreateListener listener) {
         return new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 switch (child) {
                     case "setupFB":
                         setupFB = snapshot.getValue(SetupFB.class);
+                        listener.onCreateZone();
+                        listener.onCreateProgram(false);
                         Log.d(TAG, "SetupFB : " + setupFB);
                         break;
                     case "history":
@@ -329,6 +367,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
                             historyFB.add(newHistory);
                         }
                         Collections.sort(historyFB);
+                        listener.onHistoryUpdate();
                         lastRefresh = Calendar.getInstance().getTimeInMillis();
                         Log.d(TAG, "HistoryFB: " + historyFB);
                     default:
@@ -408,15 +447,15 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
     }
 
     private void setLl_dots() {
-        if (ll_dots.getChildCount() != programs.size()) {
+        if (ll_dots.getChildCount() != setupFB.getPrograms().size()) {
             ll_dots.removeAllViews();
-            for (int i=0;i<programs.size();i++) {
+            for (int i=0;i<setupFB.getPrograms().size();i++) {
                 ImageView iv = (ImageView) getLayoutInflater().inflate(R.layout.dot, ll_dots, false);
                 iv.setActivated(i != currProgram);
                 ll_dots.addView(iv);
             }
         } else {
-            for (int i = 0; i < programs.size(); i++) {
+            for (int i = 0; i < setupFB.getPrograms().size(); i++) {
                 ImageView iv = (ImageView) ll_dots.getChildAt(i);
                 iv.setActivated(i != currProgram);
             }
@@ -429,7 +468,12 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         setup.setPrograms(programs);
         setup.toFile();
 
-        saveProgramFDB();
+        saveSetupFB();
+    }
+
+    private void saveSetupFB() {
+        Log.d(TAG, "saveProgramFB()");
+        databaseReference.child("setupFB").setValue(setupFB);
     }
 
     private void saveProgramFDB() {
@@ -604,16 +648,22 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
     @Override
     public void onCreateZone() {
         loadFlexBox();
+        loadFlexBoxFB();
         // TODO
-        UrlAsync async = new UrlAsync();
-        async.execute("POST","update/zones", gson.toJson(zones));
+        //UrlAsync async = new UrlAsync();
+        //async.execute("POST","update/zones", gson.toJson(zones));
         setup.setZones(zones);
         setup.toFile();
     }
 
     @Override
+    public void onHistoryUpdate() {
+        drawHistory();
+    }
+
+    @Override
     public void onCreateProgram(boolean save) {
-        pagerAdapter = new ProgramSwipeAdapter(this, programs.size(), this);
+        pagerAdapter = new ProgramSwipeAdapter(this, this);
         pager.setAdapter(pagerAdapter);
         setLl_dots();
         if (save)
@@ -660,7 +710,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
 
     private double[] getMaxMin() {
         double[] mm = new double[] {0, 0};
-        for (History h : history) {
+        for (HistoryFB h : historyFB) {
             if (mm[0] == 0 || mm[0] < h.getTMax()) {
                 mm[0] = h.getTMax();
             }
@@ -714,6 +764,17 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
             ret.addAll(h.getHistory());
         }
         ret.sort(History.Temp.comparator);
+        return ret;
+    }
+
+    private List<HistoryFB.Temp> getTempFBList() {
+        List<HistoryFB.Temp> ret = new ArrayList<>();
+        for (HistoryFB h : historyFB) {
+            Log.d("getTempList()", Constants.sdf.format(h.getDt()));
+            for (Map.Entry<String, HistoryFB.Temp> entry : h.getHistory().entrySet())
+                ret.add(entry.getValue());
+        }
+        Collections.sort(ret);
         return ret;
     }
 
@@ -805,7 +866,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         int i = (int) mm[0] - tL;
 
         List<Double> avg = new ArrayList<>();
-        List<History.Temp> tempList = getTempList();
+        List<HistoryFB.Temp> tempList = getTempFBList();
         int avgSize = tempList.size()/(historyDays/2);
 
         while (i > mm[0] - 5*tL) {
@@ -833,16 +894,16 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         pH.moveTo((float) xOff, (float) iHistH);
         boolean move = true;
         double x = xOff;
-        for (History.Temp t : tempList) {
+        for (HistoryFB.Temp t : tempList) {
             addListValue(avg, t.getT(), avgSize);
-            double mA = getMonthlyAvgTemp(t.getTime());
+            double mA = getMonthlyAvgTemp(t.getTimeDate());
             //double a = getTempF(getTempAvg(t.getTime(), tempAvgMap));
             double a = getTempF(getListAvg(avg));
             getAvg(tAvg, t.getT());
             getAvg(hAvg, t.getH());
             double tmp = tAvg.get(tAvg.size()-1);
             double hum = hAvg.get(hAvg.size()-1);
-            x = xOff+(t.getTime().getTime()-minMs)*xMs;
+            x = xOff+(t.getTime()-minMs)*xMs;
             double fTmp = getTempF(tmp);
             double y = (mm[0]-fTmp)*yD;
             double yH = (100-hum)*yDH;
@@ -870,6 +931,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         pAvg.setColor(getThemeColor(R.attr.colorSecondaryVariant));
         canvas.drawPath(pMA, pAvg);
         canvas.drawPath(pT, pTemp);
+        iv_history.setImageBitmap(null);
         iv_history.setImageBitmap(bitmap);
     }
 
@@ -1007,7 +1069,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         ProgramAlert alert = new ProgramAlert()
                 .withListener(this)
                 .withContext(this);
-        ProgramAlert.getProgramAlert(alert, programs.size());
+        ProgramAlert.getProgramAlert(alert, programs.size(), null);
     }
 
     public void setDelay(View v) {
@@ -1060,7 +1122,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
         super.onStart();
         //click();
         if (mAuth.getCurrentUser() != null) {
-            registerFirebaseListeners("onStart");
+            registerFirebaseListeners("onStart", this);
         }
     }
 
@@ -1072,7 +1134,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
 
         if (mAuth.getCurrentUser() != null) {
             if (lastRefresh < (Calendar.getInstance().getTimeInMillis()-(15f*60*1000)))
-                registerFirebaseListeners("onResume");
+                registerFirebaseListeners("onResume", this);
         }
     }
 
@@ -1080,7 +1142,7 @@ public class MainActivityPiSprinkler extends AppCompatActivity implements UrlRes
     public void onPause() {
         super.onPause();
         if (mAuth.getCurrentUser() != null) {
-            registerFirebaseListeners("onPause");
+            registerFirebaseListeners("onPause", this);
         }
     }
 }

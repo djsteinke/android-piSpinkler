@@ -14,7 +14,10 @@ import android.widget.Toast;
 
 import com.google.android.flexbox.FlexboxLayout;
 
+import java.util.Objects;
+
 import rnfive.htfu.pisprinkler.define.ProgramAlert;
+import rnfive.htfu.pisprinkler.define.ProgramFB;
 import rnfive.htfu.pisprinkler.define.SlideButton;
 import rnfive.htfu.pisprinkler.define.Step;
 import rnfive.htfu.pisprinkler.define.StepAlert;
@@ -27,6 +30,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.programs;
+import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.setupFB;
 import static rnfive.htfu.pisprinkler.MainActivityPiSprinkler.zones;
 import static rnfive.htfu.pisprinkler.define.Constants.formatInt;
 import static rnfive.htfu.pisprinkler.define.Constants.sdfDisplay;
@@ -45,8 +49,10 @@ public class ProgramFragment extends Fragment {
     private TextView tv_interval;
     private TextView next;
     private ImageView active;
+    private final ProgramFB programFB;
 
-    public ProgramFragment() {
+    public ProgramFragment(ProgramFB programFB) {
+        this.programFB = programFB;
     }
     public ProgramFragment withPos(int pos) {
         this.pos = pos;
@@ -75,6 +81,7 @@ public class ProgramFragment extends Fragment {
         ImageButton btEditProg = vItem.findViewById(R.id.ib_edit_program);
         ImageButton btRun = vItem.findViewById(R.id.ib_run_program);
         stepAlert = new StepAlert(context).withListener(this.listener);
+        final String nameVal = name.getText().toString();
         SlideButton sb = new SlideButton(context, btEdit)
                 .withButton(btAddStep)
                 .withButton(btEditProg)
@@ -84,18 +91,18 @@ public class ProgramFragment extends Fragment {
             ProgramAlert alert = new ProgramAlert()
                     .withListener(listener)
                     .withContext(vItem.getContext());
-            ProgramAlert.getProgramAlert(alert, pos);
+            ProgramAlert.getProgramAlert(alert, pos, nameVal);
         });
-        btAddStep.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, programs.get(pos).getSteps().size(), pos));
+        btAddStep.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, Objects.requireNonNull(setupFB.getPrograms().get(nameVal)).getStepsSize(), pos));
         btRun.setOnClickListener(view -> {
             UrlAsync async = new UrlAsync();
-            async.execute("GET","program/run/" + programs.get(pos).getName());
-            String txt = "Program " + programs.get(pos).getName() + " Started";
-            Toast.makeText(context, txt, Toast.LENGTH_SHORT).show();
+//            async.execute("GET","program/run/" + programs.get(pos).getName());
+//            String txt = "Program " + programs.get(pos).getName() + " Started";
+//            Toast.makeText(context, txt, Toast.LENGTH_SHORT).show();
             sb.expand();
         });
 
-        if (programs.size() > 0) {
+        if (setupFB.getPrograms().size() > 0) {
             updateProgram();
             updateSteps(context);
         }
@@ -104,17 +111,17 @@ public class ProgramFragment extends Fragment {
     }
 
     public void updateProgram() {
-        name.setText(programs.get(pos).getName());
-        tv_start.setText(sdfTime.format(programs.get(pos).getStartTime()));
-        String interval = programs.get(pos).getInterval() + " DAYS";
+        name.setText(programFB.getName());
+        tv_start.setText(sdfTime.format(programFB.getStartTime()));
+        String interval = programFB.getInterval() + " DAYS";
         tv_interval.setText(interval);
-        next.setText(sdfDisplay.format(programs.get(pos).getNextRunTime()));
-        active.setActivated(programs.get(pos).isActive());
+        next.setText(sdfDisplay.format(programFB.getNextRunTime()));
+        active.setActivated(programFB.isActive());
     }
 
     public void updateSteps(Context context) {
         fb.removeAllViews();
-        for (Step s : programs.get(pos).getSteps()) {
+        for (Step s : programFB.getSteps()) {
             ConstraintLayout cl = fb.findViewById(s.getStep());
             if (cl != null) {
                 populateCl(cl, s);
@@ -124,7 +131,7 @@ public class ProgramFragment extends Fragment {
                     cl = (ConstraintLayout) inflater.inflate(R.layout.fb_step_v, fb, false);
                     cl.setId(s.getStep());
 
-                    populateClv(context, cl, s, programs.get(pos).getSteps().size());
+                    populateClv(context, cl, s, programFB.getStepsSize());
 
                     cl.setOnClickListener(view -> StepAlert.getStepAlert(stepAlert, s.getStep(), pos));
 
@@ -137,26 +144,28 @@ public class ProgramFragment extends Fragment {
     private ConstraintLayout populateClv(Context context, ConstraintLayout cl, Step s, int size) {
         TextView tvZ = cl.findViewById(R.id.zone_id);
         tvZ.setText(formatInt(s.getZone() + 1));
-        int type = zones.get(s.getZone()).getType();
-        int bk;
-        switch (type) {
-            case 2:
-                bk = R.drawable.head_rotor;
-                break;
-            case 1:
-                bk = R.drawable.head_rotary;
-                break;
-            case 0:
-            default:
-                bk = R.drawable.head_fixed;
-                break;
+        if (setupFB != null) {
+            int type = setupFB.getZones().get(s.getZone()).getType();
+            int bk;
+            switch (type) {
+                case 2:
+                    bk = R.drawable.head_rotor;
+                    break;
+                case 1:
+                    bk = R.drawable.head_rotary;
+                    break;
+                case 0:
+                default:
+                    bk = R.drawable.head_fixed;
+                    break;
+            }
+            tvZ.setBackground(ContextCompat.getDrawable(context, bk));
+            ImageView iv = cl.findViewById(R.id.arrow);
+            if (s.getStep() == size - 1)
+                iv.setVisibility(View.GONE);
+            else
+                iv.setVisibility(View.VISIBLE);
         }
-        tvZ.setBackground(ContextCompat.getDrawable(context, bk));
-        ImageView iv = cl.findViewById(R.id.arrow);
-        if (s.getStep() == size-1)
-            iv.setVisibility(View.GONE);
-        else
-            iv.setVisibility(View.VISIBLE);
 /*
         TextView tvT = cl.findViewById(R.id.time);
         String val = formatInt((s.getPercent() > 0 ? s.getPercent() : s.getTime())) + (s.getPercent() > 0 ? "%" : " MIN");

@@ -6,4 +6,5 @@ public interface CreateListener {
     void onUpdateUrl();
     void onUpdateStep(int pPos);
     void onUpdateProgram(int pPos);
+    void onHistoryUpdate();
 }

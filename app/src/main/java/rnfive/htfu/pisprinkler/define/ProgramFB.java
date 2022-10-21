@@ -19,4 +19,8 @@ public class ProgramFB {
     private final List<Step> steps = new ArrayList<>();
 
     public ProgramFB() {}
+
+    public int getStepsSize() {
+        return steps.size();
+    }
 }
